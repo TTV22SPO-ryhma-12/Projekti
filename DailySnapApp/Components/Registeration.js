@@ -14,8 +14,8 @@ function RegisterationForm() {
     const handleSubmit = async (event) => {
         try {
             await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            setSuccessMessage('User ${user.email} has been registered');
+            
+            setSuccessMessage('User has been registered');
         } catch (error) {
             setError(error.message);
         }
