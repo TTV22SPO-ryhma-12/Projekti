@@ -1,24 +1,30 @@
-import { StyleSheet, View, TextInput, Button } from 'react-native';
-import { firestore, collection, addDoc, serverTimestamp, messages } from './Firebase/FirebaseConfig';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { StyleSheet, View, StatusBar } from 'react-native';
+import NavBar from './NavBar';
 
 export default function App() {
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [showSignIn, setShowSignIn] = useState(false);
 
-  const [newmessage, setnewmessage] = useState('')
+  const handleSignIn = () => {
+    // Your sign-in logic here
+    // For simplicity, I'm just setting isSignedIn to true
+    setIsSignedIn(true);
+    setShowSignIn(false);
+  };
 
-  const save = async () => {
-    await addDoc(collection(firestore, messages), {
-      text: newmessage,
-      timestamp: serverTimestamp()
-    })
-    setnewmessage('')
-    console.log('message saved')
-  }
+  const handleSignOut = () => {
+    setIsSignedIn(false);
+  };
+
+  const handleToggleSignIn = () => {
+    setShowSignIn(!showSignIn);
+  };
 
   return (
     <View style={styles.container}>
-      <TextInput placeholder='Kirjoita viesti...' value={newmessage} onChangeText={text => setnewmessage(text)} />
-      <Button title='Lähetä viesti' type="button" onPress={save} />
+      <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleToggleSignIn} onSignOut={handleSignOut} />
+      {showSignIn && <SignIn onSignIn={handleSignIn} />}
     </View>
   );
 }
@@ -27,7 +33,5 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
