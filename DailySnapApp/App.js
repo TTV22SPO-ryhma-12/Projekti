@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, StatusBar } from 'react-native';
 import NavBar from './NavBar';
+import Constants from 'expo-constants';
+
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -23,6 +25,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
+       <StatusBar backgroundColor="#000" barStyle="light-content" />
       <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleToggleSignIn} onSignOut={handleSignOut} />
       {showSignIn && <SignIn onSignIn={handleSignIn} />}
     </View>

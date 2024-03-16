@@ -1,5 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
+import Constants from 'expo-constants';
+
 
 const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
   return (
@@ -20,8 +22,9 @@ const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
 
 const styles = StyleSheet.create({
   navbar: {
+    paddingTop: Constants.statusBarHeight,
     backgroundColor: '#000',
-    height: 50,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: 1,
