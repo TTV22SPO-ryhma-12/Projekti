@@ -1,8 +1,12 @@
 import { StyleSheet, View, TextInput, Button } from 'react-native';
-import { firestore, collection, addDoc, serverTimestamp, messages } from './Firebase/FirebaseConfig';
+import { firestore, collection, addDoc, serverTimestamp, messages, getAuth } from './Firebase/FirebaseConfig';
 import { useState } from 'react';
+import { RegisterationForm } from './Components/Registeration';
+import { getFirestore } from 'firebase/firestore';
 
 export default function App() {
+
+getFirestore();
 
   const [newmessage, setnewmessage] = useState('')
 
@@ -17,8 +21,7 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <TextInput placeholder='Kirjoita viesti...' value={newmessage} onChangeText={text => setnewmessage(text)} />
-      <Button title='Lähetä viesti' type="button" onPress={save} />
+      <RegisterationForm />
     </View>
   );
 }
