@@ -1,10 +1,8 @@
-import { StyleSheet, View, TextInput, Button } from 'react-native';
+import { StyleSheet, View, TextInput, Button, StatusBar } from 'react-native';
 import { firestore, collection, addDoc, serverTimestamp, messages, getAuth } from './Firebase/FirebaseConfig';
 import { useState } from 'react';
 import { RegisterationForm } from './Components/Registeration';
 import { getFirestore } from 'firebase/firestore';
-import React, { useState } from 'react';
-import { StyleSheet, View, StatusBar } from 'react-native';
 import NavBar from './NavBar';
 import Constants from 'expo-constants';
 
