@@ -14,7 +14,7 @@ const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
         </TouchableOpacity>
       ) : (
         <TouchableOpacity onPress={onToggleSignIn}>
-          <Image source={require('./assets/login.png')} style={styles.signInImage} />
+          <Image source={require('../assets/login.png')} style={styles.signInImage} />
         </TouchableOpacity>
       )}
     </View>

@@ -1,35 +1,41 @@
 import React, { useState } from 'react';
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
-import { SafeAreaView, Text, View, TextInput, Button, StyleSheet } from 'react-native';
+import { getAuth } from "firebase/auth";
+import { SafeAreaView, Text, View, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { signUpWithEmailAndPassword } from '../Firebase/FirebaseAuth';
 
 const auth = getAuth();
 
-function RegisterationForm() {
+function RegistrationForm() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
 
-
-    const handleSubmit = async (event) => {
+    const handleSubmit = async () => {
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            
+            setLoading(true);
+            await signUpWithEmailAndPassword(auth, email, password);
             setSuccessMessage('User has been registered');
+            console.log('rekisteröinti onnistui')
+            
         } catch (error) {
             setError(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <SafeAreaView edges={['top']} style={styles.container}>
             <View>
-                <Text style={styles.heading}>Registeration</Text>
+                <Text style={styles.heading}>Registration</Text>
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
                     onChangeText={setEmail}
                     value={email}
+                    accessibilityLabel="Email Input"
                 />
                 <TextInput
                     style={styles.input}
@@ -37,15 +43,20 @@ function RegisterationForm() {
                     onChangeText={setPassword}
                     value={password}
                     secureTextEntry={true}
+                    accessibilityLabel="Password Input"
                 />
-                <Button title="Register" onPress={handleSubmit} />
+                <Button
+                    title={loading ? "Registering..." : "Register"}
+                    onPress={handleSubmit}
+                    disabled={loading}
+                    accessibilityLabel="Register Button"
+                />
                 {error && <Text style={styles.error}>{error}</Text>}
                 {successMessage && <Text style={styles.successMessage}>{successMessage}</Text>}
             </View>
         </SafeAreaView>
     );
 }
-
 
 const styles = StyleSheet.create({
     container: {
@@ -66,13 +77,12 @@ const styles = StyleSheet.create({
     },
     error: {
         color: 'red',
+        textAlign: 'center',
     },
     successMessage: {
         color: 'green',
+        textAlign: 'center',
     },
 });
 
-
-export {
-    RegisterationForm
-}
+export { RegistrationForm };
