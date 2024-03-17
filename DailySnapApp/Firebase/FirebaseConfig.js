@@ -19,9 +19,6 @@ const firebaseConfig = {
 
 initializeApp(firebaseConfig);
 const firestore =  getFirestore();
-
-const messages = 'messages' 
-
 const auth = getAuth();
 
 
@@ -33,5 +30,6 @@ export {
   serverTimestamp,
   messages,
   auth
+
 
 }

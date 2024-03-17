@@ -1,8 +1,9 @@
 import { StyleSheet, View, TextInput, Button, StatusBar } from 'react-native';
+import { firestore, collection, addDoc, serverTimestamp, messages, getAuth } from './Firebase/FirebaseConfig';
 import { useState } from 'react';
-import { RegisterationForm } from './Components/Registeration';
-import NavBar from './NavBar';
-
+import { RegisterationForm } from './screens/Registeration';
+import NavBar from './Components/NavBar';
+import { LoginForm } from './screens/Login';
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -19,9 +20,9 @@ export default function App() {
   return (
     <View style={styles.container}>
       <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleToggleSignIn} onSignOut={handleSignOut} />
-    
+
        <StatusBar backgroundColor="#000" barStyle="light-content" />
-      {showSignIn && <RegisterationForm onSignIn={handleToggleSignIn} />}
+      {showSignIn && <LoginForm onSignIn={handleToggleSignIn} />}
     </View>
   );
 }
