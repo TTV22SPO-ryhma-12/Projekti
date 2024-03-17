@@ -6,7 +6,6 @@ import { signUpWithEmailAndPassword } from '../Firebase/FirebaseAuth';
 const auth = getAuth();
 
 function RegistrationForm() {
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -18,6 +17,8 @@ function RegistrationForm() {
             setLoading(true);
             await signUpWithEmailAndPassword(auth, email, password);
             setSuccessMessage('User has been registered');
+            console.log('rekisteröinti onnistui')
+            
         } catch (error) {
             setError(error.message);
         } finally {
@@ -29,13 +30,6 @@ function RegistrationForm() {
         <SafeAreaView edges={['top']} style={styles.container}>
             <View>
                 <Text style={styles.heading}>Registration</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Username"
-                    onChangeText={setUsername}
-                    value={username}
-                    accessibilityLabel="Username Input"
-                />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
