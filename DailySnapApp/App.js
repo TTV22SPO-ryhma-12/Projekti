@@ -25,10 +25,10 @@ getFirestore();
 
   return (
     <View style={styles.container}>
-      <RegisterationForm />
-       <StatusBar backgroundColor="#000" barStyle="light-content" />
       <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleToggleSignIn} onSignOut={handleSignOut} />
-      {showSignIn && <SignIn onSignIn={handleSignIn} />}
+      
+       <StatusBar backgroundColor="#000" barStyle="light-content" />
+      {showSignIn && <RegisterationForm onSignIn={handleToggleSignIn} />}
     </View>
   );
 }
