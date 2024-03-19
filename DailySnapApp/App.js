@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { RegisterationForm } from './screens/Registeration';
 import NavBar from './Components/NavBar';
 import { LoginForm } from './screens/Login';
+import { CameraComponent } from './Components/camera';
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -23,6 +24,7 @@ export default function App() {
 
        <StatusBar backgroundColor="#000" barStyle="light-content" />
       {showSignIn && <LoginForm onSignIn={handleToggleSignIn} />}
+      <CameraComponent />
     </View>
   );
 }

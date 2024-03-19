@@ -1,4 +1,6 @@
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { storage } from "./FirebaseConfig";
+import { uploadBytesResumable, ref } from "firebase/storage";
 
 // Initialize Firebase authentication
 const auth = getAuth();
@@ -56,9 +58,49 @@ const onAuthStateChange = (callback) => {
     });
 };
 
+
+/** 
+ * 
+ * @param {*} uri
+ * @param {*} name
+*/
+
+const uploadToFirebase = async (uri, name) => {
+
+    const fetchResponse = await fetch(uri);
+    const theBlob = await fetchResponse.blob();
+    console.log(theBlob)
+
+    const storageRef = ref(storage, `images/${name}`);
+    const uploadTask = uploadBytesResumable(storageRef, theBlob);
+
+    return new Promise((resolve, reject) => {
+        uploadTask.on(
+            'state_changed',
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('Upload is ' + progress + '% done');
+            },
+            (error) => {
+                reject(error);
+            },
+            async () => {
+                const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve({
+                    downloadUrl,
+                    metadata : uploadTask.snapshot.metadata
+                });
+            }
+        )
+    })
+    
+}
+
+
 export {
     auth,
     signUpWithEmailAndPassword,
     signIn,
-    onAuthStateChange
+    onAuthStateChange,
+    uploadToFirebase
 };
