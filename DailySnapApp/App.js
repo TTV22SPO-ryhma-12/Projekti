@@ -6,11 +6,7 @@ import NavBar from './Components/NavBar';
 import { LoginForm } from './screens/Login';
 import { CameraComponent } from './Components/camera';
 import { onAuthStateChanged } from 'firebase/auth';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
-const Stack = createNativeStackNavigator();
-
+import ProfilePage from './screens/ProfilePage';
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -23,6 +19,11 @@ export default function App() {
     return () => unsubscribe() // Cleanup subscription
   }, [])
 
+  const handleSignIn = () => {
+    // This function might not be necessary as your LoginForm component should handle the sign-in logic
+    // But you can use it to toggle additional UI elements or functionality after sign-in, if needed
+  };
+
   const handleSignOut = async () => {
     await auth.signOut()
     // `isSignedIn` will automatically be set to false by the auth listener
@@ -30,12 +31,15 @@ export default function App() {
 
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Profile" component={ProfilePage} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <View style={styles.container}>
+      <StatusBar backgroundColor="#000" barStyle="light-content" />
+      <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleSignIn} onSignOut={handleSignOut} />
+      {isSignedIn ? (
+       <ProfilePage />
+      ) : (
+        <LoginForm onSignInSuccess={() => setIsSignedIn(true)} />
+      )}
+    </View>
   );
 }
 

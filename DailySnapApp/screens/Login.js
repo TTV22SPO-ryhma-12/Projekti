@@ -6,7 +6,7 @@ import { RegistrationForm } from './Registeration';
 // Initialize Firebase authentication
 const auth = getAuth();
 
-function LoginForm() {
+function LoginForm({ onSignInSuccess }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -20,6 +20,7 @@ function LoginForm() {
             await signInWithEmailAndPassword(auth, email, password);
             setSuccessMessage('Login successful');
             console.log('login successful')
+            onSignInSuccess()
         } catch (error) {
             setError(error.message);
         } finally {

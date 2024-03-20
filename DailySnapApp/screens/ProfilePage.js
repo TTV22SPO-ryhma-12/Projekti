@@ -1,12 +1,13 @@
 import React from 'react'; 
 import { TouchableOpacity, View, Text, Alert, StyleSheet } from 'react-native'; 
+import { getAuth } from 'firebase/auth';
 
+const auth = getAuth();
 
-
-export default function ProfilePage() {
+function ProfilePage() {
 
     const handleSignOut = async () => {
-        await auth.signOut(); // Ensure 'auth' is defined and imported correctly
+        await auth.signOut() // Ensure 'auth' is defined and imported correctly
     };
 
     const showModal = () => { // Renamed for clarity
@@ -23,7 +24,7 @@ export default function ProfilePage() {
         <View style={styles.container}>
             <View>
                 <Text style={styles.navText}>Tervetuloa profiiliisi</Text>
-                <TouchableOpacity style={styles.button} onPress={showModal}> {/* Updated to showModal */}
+                <TouchableOpacity style={styles.button} onPress={showModal}>
                     <Text style={styles.buttonText}>Sign out</Text>
                 </TouchableOpacity>
             </View>
@@ -53,3 +54,5 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
 });
+
+export default ProfilePage;
