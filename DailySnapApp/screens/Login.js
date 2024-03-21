@@ -20,6 +20,8 @@ function LoginForm({ onSignInSuccess }) {
             await signInWithEmailAndPassword(auth, email, password);
             setSuccessMessage('Login successful');
             console.log('login successful')
+            console.log(auth.currentUser.uid)
+            
             onSignInSuccess()
         } catch (error) {
             setError(error.message);

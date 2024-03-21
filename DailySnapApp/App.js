@@ -7,6 +7,7 @@ import { LoginForm } from './screens/Login';
 import { CameraComponent } from './Components/camera';
 import { onAuthStateChanged } from 'firebase/auth';
 import ProfilePage from './screens/ProfilePage';
+import Home from './screens/Home';
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
@@ -35,7 +36,8 @@ export default function App() {
       <StatusBar backgroundColor="#000" barStyle="light-content" />
       <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleSignIn} onSignOut={handleSignOut} />
       {isSignedIn ? (
-       <ProfilePage />
+       <Home />,
+       <CameraComponent />
       ) : (
         <LoginForm onSignInSuccess={() => setIsSignedIn(true)} />
       )}

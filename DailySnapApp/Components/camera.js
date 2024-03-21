@@ -1,11 +1,12 @@
 import React from 'react';
 import { Text, View, StyleSheet, Button, StatusBar } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import {uploadToFirebase} from '../Firebase/FirebaseAuth';
+import {uploadToFirebase, auth} from '../Firebase/FirebaseAuth';
 
 function CameraComponent() {
   const [permission, requestPermission] = ImagePicker.useCameraPermissions(); // Minor correction in the function name
 
+  
   // Function to handle taking a picture
   const takePicture = async () => {
     // Ensure permissions are granted before launching the camera
@@ -19,9 +20,7 @@ function CameraComponent() {
       if (!cameraResp.canceled) {
         const { uri } = cameraResp.assets[0]
         const fileName = uri.split('/').pop();
-        const uploadResp =  await uploadToFirebase(uri, fileName, (v) =>
-        console.log(v)
-        );
+        const uploadResp =  await uploadToFirebase(uri, `${auth.currentUser.uid}/${fileName}`);
         console.log(uploadResp);
         // Here you might want to set state with the image URI, display it, or upload it to Firebase
       }

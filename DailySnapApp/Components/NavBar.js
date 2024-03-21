@@ -1,16 +1,22 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text, StatusBar } from 'react-native';
 import Constants from 'expo-constants';
+import ProfilePage from '../screens/ProfilePage';
 
 StatusBar.setBarStyle('light-content', true);
+
+const goToProfile = () => {
+  <ProfilePage />
+  
+};
 
 const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
   return (
     <View style={styles.navbar}>
       <Text style={styles.navText}>DailySnap</Text>
       {isSignedIn ? (
-        <TouchableOpacity onPress={onSignOut}>
-          <Text style={styles.navButton}>Kirjaudu ulos</Text>
+        <TouchableOpacity onPress={goToProfile}>
+          <Image source={require('../assets/login.png')} style={styles.signInImage} />
         </TouchableOpacity>
       ) : (
         <TouchableOpacity onPress={onToggleSignIn}>
