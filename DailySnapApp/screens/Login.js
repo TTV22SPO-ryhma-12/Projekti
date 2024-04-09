@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView, Text, View, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import RegistrationForm from './Registeration';
 
 // Initialize Firebase authentication
 const auth = getAuth();

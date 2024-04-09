@@ -8,6 +8,7 @@ import NavBar from './Components/NavBar';
 import LoginForm from './screens/Login';
 import Home from './screens/Home';
 import ProfilePage from './screens/ProfilePage';
+import  RegistrationForm  from './screens/Registeration'; 
 
 // Create a stack navigator
 const Stack = createStackNavigator();
@@ -44,7 +45,10 @@ export default function App() {
               <Stack.Screen name="Profile" component={ProfilePage} />
             </>
           ) : (
-            <Stack.Screen name="Login" component={LoginForm} />
+            <>
+              <Stack.Screen name="Login" component={LoginForm} />
+              <Stack.Screen name="Register" component={RegistrationForm} /> 
+            </>
           )}
         </Stack.Navigator>
         <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleSignIn} onSignOut={handleSignOut} />
