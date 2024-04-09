@@ -1,4 +1,5 @@
 import { StyleSheet, View, Text, TextInput, Button, StatusBar } from 'react-native';
+import { CameraComponent } from '../Components/camera';
 
 
 
@@ -7,6 +8,7 @@ export default function Home(){
     return(
         <View style={styles.home}>
             <Text>Tervetuloa kotisivulle</Text>
+            <CameraComponent />
         </View>
     )
 }
