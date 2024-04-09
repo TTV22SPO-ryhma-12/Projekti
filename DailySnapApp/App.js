@@ -9,6 +9,7 @@ import LoginForm from './screens/Login';
 import Home from './screens/Home';
 import ProfilePage from './screens/ProfilePage';
 import  RegistrationForm  from './screens/Registeration'; 
+import Settings from './screens/Settings';
 
 // Create a stack navigator
 const Stack = createStackNavigator();
@@ -43,6 +44,7 @@ export default function App() {
             <>
               <Stack.Screen name="Home" component={Home} />
               <Stack.Screen name="Profile" component={ProfilePage} />
+              <Stack.Screen name="Settings" component={Settings} />
             </>
           ) : (
             <>
