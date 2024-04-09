@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import {uploadToFirebase, auth} from '../Firebase/FirebaseAuth';
 
 function CameraComponent() {
-  const [permission, requestPermission] = ImagePicker.useCameraPermissions(); // Minor correction in the function name
+  const [permission, requestPermission] = ImagePicker.useCameraPermissions();
 
   
   // Function to handle taking a picture

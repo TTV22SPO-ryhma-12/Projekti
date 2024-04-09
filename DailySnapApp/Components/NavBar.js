@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text, StatusBar } from 'react-native';
 import { useNavigation } from '@react-navigation/native'; // Import the navigation hook from react-navigation/native
-import Constants from 'expo-constants';
+
 
 StatusBar.setBarStyle('light-content', true);
 
@@ -10,6 +10,7 @@ const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
 
   const goToProfile = () => {
     navigation.navigate('Profile'); // Navigate to the 'Profile' screen
+    console.log("profile screen opened")
   };
 
   return (
