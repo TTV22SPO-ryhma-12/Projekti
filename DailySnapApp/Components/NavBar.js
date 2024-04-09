@@ -30,7 +30,6 @@ const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
 
 const styles = StyleSheet.create({
   navbar: {
-    paddingTop: Constants.statusBarHeight,
     backgroundColor: '#000',
     height: 80,
     justifyContent: 'center',

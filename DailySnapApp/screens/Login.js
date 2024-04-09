@@ -1,27 +1,23 @@
-// LoginForm.js
-
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { SafeAreaView, Text, View, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
-import RegistrationForm from './Registeration';
+import { SafeAreaView, Text, View, TextInput, Button, StyleSheet } from 'react-native';
 
 // Initialize Firebase authentication
 const auth = getAuth();
 
-export default function Login({ onSignInSuccess }) { // Ensure that the component is exported as default
+export default function LoginForm({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
-    const [showRegister, setShowRegister] = useState(false);
 
     const handleSubmit = async () => {
         try {
             setLoading(true);
             await signInWithEmailAndPassword(auth, email, password);
             setSuccessMessage('Login successful');
-            onSignInSuccess();
+            // Navigate to the home screen or any other screen upon successful login
         } catch (error) {
             setError(error.message);
         } finally {
@@ -30,12 +26,9 @@ export default function Login({ onSignInSuccess }) { // Ensure that the componen
     };
 
     const handleRegister = () => {
-        setShowRegister(true);
+        navigation.navigate('Register'); // Navigate to the registration form screen
+        console.log("registration screen opened")
     };
-
-    if (showRegister) {
-        return <RegistrationForm/>;
-    }
 
     return (
         <SafeAreaView edges={['top']} style={styles.container}>
