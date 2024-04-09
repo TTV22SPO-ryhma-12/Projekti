@@ -85,4 +85,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export { RegistrationForm };
+export default RegistrationForm;
