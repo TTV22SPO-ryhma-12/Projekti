@@ -41,10 +41,8 @@ const fetchImages = async (path) => {
     const storageRef = ref(storage, path);
     try {
         const result = await listAll(storageRef);
-        console.log("list",result.items);
         const urlPromises = result.items.map((itemRef) => getDownloadURL(itemRef));
         const urls = await Promise.all(urlPromises);
-        console.log(urls);
         return urls;
     } catch (error) {
         console.error('Error fetching images:', error);
