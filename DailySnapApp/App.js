@@ -1,24 +1,27 @@
-import { StyleSheet, View, TextInput, Button, StatusBar } from 'react-native';
-import { firestore, collection, addDoc, serverTimestamp, messages, getAuth, auth } from './Firebase/FirebaseConfig';
-import { useState, useEffect } from 'react';
-import { RegisterationForm } from './screens/Registeration';
-import NavBar from './Components/NavBar';
-import { LoginForm } from './screens/Login';
-import { CameraComponent } from './Components/camera';
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { StyleSheet, View, StatusBar } from 'react-native';
 import { onAuthStateChanged } from 'firebase/auth';
-import ProfilePage from './screens/ProfilePage';
+import { auth } from './Firebase/FirebaseConfig';
+import NavBar from './Components/NavBar';
+import LoginForm from './screens/Login';
 import Home from './screens/Home';
+import ProfilePage from './screens/ProfilePage';
+
+// Create a stack navigator
+const Stack = createStackNavigator();
 
 export default function App() {
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setIsSignedIn(!!user) // User is signed in if `user` is not null
+      setIsSignedIn(!!user); // User is signed in if `user` is not null
     });
 
-    return () => unsubscribe() // Cleanup subscription
-  }, [])
+    return () => unsubscribe(); // Cleanup subscription
+  }, []);
 
   const handleSignIn = () => {
     // This function might not be necessary as your LoginForm component should handle the sign-in logic
@@ -26,22 +29,27 @@ export default function App() {
   };
 
   const handleSignOut = async () => {
-    await auth.signOut()
+    await auth.signOut();
     // `isSignedIn` will automatically be set to false by the auth listener
-  }
-
+  };
 
   return (
-    <View style={styles.container}>
-      <StatusBar backgroundColor="#000" barStyle="light-content" />
-      <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleSignIn} onSignOut={handleSignOut} />
-      {isSignedIn ? (
-       <Home />,
-       <CameraComponent />
-      ) : (
-        <LoginForm onSignInSuccess={() => setIsSignedIn(true)} />
-      )}
-    </View>
+    <NavigationContainer>
+      <View style={styles.container}>
+        <StatusBar backgroundColor="#000" barStyle="light-content" />
+        <Stack.Navigator>
+          {isSignedIn ? (
+            <>
+              <Stack.Screen name="Home" component={Home} />
+              <Stack.Screen name="Profile" component={ProfilePage} />
+            </>
+          ) : (
+            <Stack.Screen name="Login" component={LoginForm} />
+          )}
+        </Stack.Navigator>
+        <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleSignIn} onSignOut={handleSignOut} />
+      </View>
+    </NavigationContainer>
   );
 }
 
