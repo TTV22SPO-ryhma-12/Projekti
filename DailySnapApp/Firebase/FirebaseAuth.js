@@ -1,6 +1,7 @@
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { storage } from "./FirebaseConfig";
 import { uploadBytesResumable, ref } from "firebase/storage";
+import { listAll, getDownloadURL } from "firebase/storage";
 
 // Initialize Firebase authentication
 const auth = getAuth();
@@ -34,6 +35,21 @@ const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
   
+};
+
+const fetchImages = async (path) => {
+    const storageRef = ref(storage, path);
+    try {
+        const result = await listAll(storageRef);
+        console.log("list",result.items);
+        const urlPromises = result.items.map((itemRef) => getDownloadURL(itemRef));
+        const urls = await Promise.all(urlPromises);
+        console.log(urls);
+        return urls;
+    } catch (error) {
+        console.error('Error fetching images:', error);
+        throw error;
+    }
 };
 
 
@@ -102,5 +118,6 @@ export {
     signUpWithEmailAndPassword,
     signIn,
     onAuthStateChange,
-    uploadToFirebase
+    uploadToFirebase,
+    fetchImages
 };

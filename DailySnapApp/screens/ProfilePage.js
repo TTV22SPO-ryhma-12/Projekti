@@ -1,10 +1,28 @@
 import React from 'react'; 
-import { TouchableOpacity, View, Text, Alert, StyleSheet } from 'react-native'; 
+import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView } from 'react-native'; 
 import { getAuth } from 'firebase/auth';
+import {useState, useEffect} from 'react';
+import { fetchImages } from '../Firebase/FirebaseAuth';
+
 
 const auth = getAuth();
 
 function ProfilePage({ navigation }) { // Pass the navigation prop
+    const [imageUrls, setImageUrls] = useState([]);
+
+    useEffect(() => {
+        const fetchAndSetImages = async () => {
+            try {
+                const urls = await fetchImages(`images/${auth.currentUser.uid}`);
+                console.log("fetched urls", urls)
+                setImageUrls(urls);
+            } catch (error) {
+                console.error("Error fetching images:", error.message);
+            }
+        };
+        fetchAndSetImages();
+    }, []);
+
     const handleSignOut = async () => {
         try {
             await auth.signOut();
@@ -39,15 +57,12 @@ function ProfilePage({ navigation }) { // Pass the navigation prop
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.navText}>Welcome to your profile</Text>
-            <TouchableOpacity style={styles.button} onPress={showModal}>
-                <Text style={styles.buttonText}>Sign Out</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleSettings}>
-                <Text style={styles.buttonText}>Settings</Text>
-            </TouchableOpacity>
-        </View>
+        <ScrollView contentContainerStyle={styles.container}>
+            {imageUrls.map((url, index)=> (
+                <Image key={index} source={{ uri: url }} style={styles.image} />
+            ))}
+            </ScrollView>
+            
     );
 }
 
@@ -71,6 +86,11 @@ const styles = StyleSheet.create({
     buttonText: {
         color: '#ffffff',
         fontSize: 20,
+    },
+    image: {
+        width: 200,
+        height: 200,
+        margin: 10,
     },
 });
 
