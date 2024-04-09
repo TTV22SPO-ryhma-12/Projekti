@@ -57,7 +57,7 @@ function ProfilePage({ navigation }) { // Pass the navigation prop
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView pagingEnabled={true} horizontal={false} contentContainerStyle={styles.container}>
             {imageUrls.map((url, index)=> (
                 <Image key={index} source={{ uri: url }} style={styles.image} />
             ))}
@@ -68,10 +68,8 @@ function ProfilePage({ navigation }) { // Pass the navigation prop
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        justifyContent: 'center',
+        flex: 0,
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
     },
     navText: {
         fontSize: 24,
@@ -88,9 +86,9 @@ const styles = StyleSheet.create({
         fontSize: 20,
     },
     image: {
-        width: 200,
-        height: 200,
-        margin: 10,
+        width: 400,
+        height: 400,
+        margin: 5,
     },
 });
 
