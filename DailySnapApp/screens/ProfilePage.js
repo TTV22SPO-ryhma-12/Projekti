@@ -14,7 +14,6 @@ function ProfilePage({ navigation }) { // Pass the navigation prop
         const fetchAndSetImages = async () => {
             try {
                 const urls = await fetchImages(`images/${auth.currentUser.uid}`);
-                console.log("fetched urls", urls)
                 setImageUrls(urls);
             } catch (error) {
                 console.error("Error fetching images:", error.message);
