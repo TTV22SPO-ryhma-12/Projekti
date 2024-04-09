@@ -1,28 +1,26 @@
+// LoginForm.js
+
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView, Text, View, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
-import { RegistrationForm } from './Registeration';
 
 // Initialize Firebase authentication
 const auth = getAuth();
 
-function LoginForm({ onSignInSuccess }) {
+export default function Login({ onSignInSuccess }) { // Ensure that the component is exported as default
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
-    const [showRegister, setShowRegister] = useState(false); // Add a state to manage whether to show the registration form
+    const [showRegister, setShowRegister] = useState(false);
 
     const handleSubmit = async () => {
         try {
             setLoading(true);
             await signInWithEmailAndPassword(auth, email, password);
             setSuccessMessage('Login successful');
-            console.log('login successful')
-            console.log(auth.currentUser.uid)
-            
-            onSignInSuccess()
+            onSignInSuccess();
         } catch (error) {
             setError(error.message);
         } finally {
@@ -30,12 +28,10 @@ function LoginForm({ onSignInSuccess }) {
         }
     };
 
-    // Function to handle opening the registration form
     const handleRegister = () => {
         setShowRegister(true);
     };
 
-    // Render the LoginForm or RegisterForm based on the showRegister state
     if (showRegister) {
         return <RegistrationForm/>;
     }
@@ -67,7 +63,7 @@ function LoginForm({ onSignInSuccess }) {
                 />
                 <Button
                     title="Register"
-                    onPress={handleRegister} // Attach the handleRegister function to the onPress event of the Register button
+                    onPress={handleRegister}
                     accessibilityLabel="Register Button"
                 />
                 {error && <Text style={styles.error}>{error}</Text>}
@@ -103,5 +99,3 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
-
-export { LoginForm };

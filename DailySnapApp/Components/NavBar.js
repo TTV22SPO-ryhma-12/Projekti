@@ -1,16 +1,17 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text, StatusBar } from 'react-native';
+import { useNavigation } from '@react-navigation/native'; // Import the navigation hook from react-navigation/native
 import Constants from 'expo-constants';
-import ProfilePage from '../screens/ProfilePage';
 
 StatusBar.setBarStyle('light-content', true);
 
-const goToProfile = () => {
-  <ProfilePage />
-  
-};
-
 const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
+  const navigation = useNavigation(); // Initialize the navigation object using the hook
+
+  const goToProfile = () => {
+    navigation.navigate('Profile'); // Navigate to the 'Profile' screen
+  };
+
   return (
     <View style={styles.navbar}>
       <Text style={styles.navText}>DailySnap</Text>
@@ -44,11 +45,6 @@ const styles = StyleSheet.create({
     marginRight: 'auto',
     marginLeft: 10,
     color: '#fff'
-  },
-  navButton: {
-    fontSize: 16,
-    color: 'blue',
-    marginRight: 10,
   },
   signInImage: {
     width: 30,
