@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View, StyleSheet, Button, StatusBar } from 'react-native';
+import { Text, View, StyleSheet, Button, StatusBar, TouchableOpacity, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadToFirebase, auth } from '../Firebase/FirebaseAuth';
 
@@ -32,7 +32,9 @@ function CameraComponent() {
     <View style={styles.container}>
       <StatusBar style="auto" />
       {permission?.status === ImagePicker.PermissionStatus.GRANTED ? (
-        <Button title="Take a picture" onPress={takePicture} />
+        <TouchableOpacity onPress={takePicture}>
+          <Image source={require('../assets/camera.png')} style={styles.cameraIcon} />
+        </TouchableOpacity>
       ) : (
         <View>
           <Text>No access to camera. Need permission.</Text>
@@ -48,6 +50,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  cameraIcon: {
+    width: 50,
+    height: 50,
   },
 });
 
