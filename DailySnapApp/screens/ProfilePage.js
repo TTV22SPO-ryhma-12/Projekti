@@ -53,6 +53,7 @@ function ProfilePage({ navigation }) { // Pass the navigation prop
     const handleSettings = () => {
         // Navigate to the settings screen
         navigation.navigate('Settings');
+        console.log("settings screen opened")
     };
 
     return (
