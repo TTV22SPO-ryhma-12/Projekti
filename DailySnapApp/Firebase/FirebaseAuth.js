@@ -1,6 +1,6 @@
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, deleteUser } from "firebase/auth";
 import { storage } from "./FirebaseConfig";
-import { uploadBytesResumable, ref } from "firebase/storage";
+import { uploadBytesResumable, ref, deleteObject } from "firebase/storage";
 import { listAll, getDownloadURL } from "firebase/storage";
 
 
@@ -110,6 +110,30 @@ const uploadToFirebase = async (uri, name) => {
 
 }
 
+const deleteCurrentUser = async () => {
+    const user = auth.currentUser
+
+    if(!user) {
+        throw new Error('No user signed in')
+    }
+
+    try {
+        await deleteUser(user)
+        console.log('User deleted successfully')
+    } catch (error) {
+        console.error('Error deleting user:', error)
+        throw error
+    }   
+}
+
+const deleteUserStorageData = async (userId) => {
+    const userFolderRef = ref(storage, `images/${userId}`);
+    const { items }= await listAll(userFolderRef);
+    items.forEach((itemRef)=> {
+        deleteObject(itemRef)
+    }
+    )
+}
 
 export {
     auth,
@@ -117,5 +141,7 @@ export {
     signIn,
     onAuthStateChange,
     uploadToFirebase,
-    fetchImages
+    fetchImages,
+    deleteCurrentUser,
+    deleteUserStorageData
 };
