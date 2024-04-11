@@ -1,15 +1,18 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text, StatusBar } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // Import the navigation hook from react-navigation/native
+
+import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
+
 
 StatusBar.setBarStyle('light-content', true);
 
 const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
-  const navigation = useNavigation(); // Initialize the navigation object using the hook
+  const navigation = useNavigation();
 
   const goToProfile = () => {
-    navigation.navigate('Profile'); // Navigate to the 'Profile' screen
+
+    navigation.navigate('Profile');
   };
 
   return (

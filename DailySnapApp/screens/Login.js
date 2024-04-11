@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView, Text, View, TextInput, Button, StyleSheet } from 'react-native';
 
-// Initialize Firebase authentication
+
 const auth = getAuth();
 
 export default function LoginForm({ navigation }) {
@@ -17,7 +17,6 @@ export default function LoginForm({ navigation }) {
             setLoading(true);
             await signInWithEmailAndPassword(auth, email, password);
             setSuccessMessage('Login successful');
-            // Navigate to the home screen or any other screen upon successful login
         } catch (error) {
             setError(error.message);
         } finally {
@@ -26,7 +25,7 @@ export default function LoginForm({ navigation }) {
     };
 
     const handleRegister = () => {
-        navigation.navigate('Register'); // Navigate to the registration form screen
+        navigation.navigate('Register');
         console.log("registration screen opened")
     };
 
