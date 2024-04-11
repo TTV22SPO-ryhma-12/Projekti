@@ -1,14 +1,14 @@
-import React from 'react'; 
-import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView } from 'react-native'; 
+import React, { useState, useEffect } from 'react';
+import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
 import { getAuth } from 'firebase/auth';
-import {useState, useEffect} from 'react';
 import { fetchImages } from '../Firebase/FirebaseAuth';
-
 
 const auth = getAuth();
 
-function ProfilePage({ navigation }) { // Pass the navigation prop
+function ProfilePage({ navigation }) {
     const [imageUrls, setImageUrls] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedImage, setSelectedImage] = useState('');
 
     useEffect(() => {
         const fetchAndSetImages = async () => {
@@ -41,9 +41,9 @@ function ProfilePage({ navigation }) { // Pass the navigation prop
                     onPress: () => console.log("Sign out canceled"),
                     style: "cancel"
                 },
-                { 
-                    text: "Sign Out", 
-                    onPress: handleSignOut, 
+                {
+                    text: "Sign Out",
+                    onPress: handleSignOut,
                     style: "destructive"
                 }
             ]
@@ -55,39 +55,73 @@ function ProfilePage({ navigation }) { // Pass the navigation prop
         navigation.navigate('Settings');
     };
 
+    const openImage = (url) => {
+        setSelectedImage(url);
+        setModalVisible(true);
+    };
+
     return (
-        <ScrollView pagingEnabled={true} horizontal={false} contentContainerStyle={styles.container}>
-            {imageUrls.map((url, index)=> (
-                <Image key={index} source={{ uri: url }} style={styles.image} />
-            ))}
+        <View style={styles.container}>
+            <ScrollView contentContainerStyle={styles.imageGrid}>
+                {imageUrls.map((url, index) => (
+                    <TouchableOpacity key={index} onPress={() => openImage(url)}>
+                        <Image source={{ uri: url }} style={styles.imageThumbnail} />
+                    </TouchableOpacity>
+                ))}
             </ScrollView>
-            
+
+            <Modal
+                animationType="slide"
+                transparent={false}
+                visible={modalVisible}
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+                        <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                    <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+                </View>
+            </Modal>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 0,
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    imageGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        padding: 5,
+    },
+    imageThumbnail: {
+        width: Dimensions.get('window').width / 3 - 10,
+        height: Dimensions.get('window').width / 3 - 10,
+        marginBottom: 5,
+    },
+    modalContainer: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.9)',
     },
-    navText: {
-        fontSize: 24,
-        marginBottom: 20,
+    modalImage: {
+        width: Dimensions.get('window').width - 20,
+        height: Dimensions.get('window').height - 100,
     },
-    button: {
-        backgroundColor: '#007bff',
-        padding: 10,
-        borderRadius: 5,
-        marginTop: 10, 
+    closeButton: {
+        position: 'absolute',
+        top: 30,
+        right: 20,
+        zIndex: 999,
     },
-    buttonText: {
-        color: '#ffffff',
-        fontSize: 20,
-    },
-    image: {
-        width: 400,
-        height: 400,
-        margin: 5,
+    closeButtonText: {
+        color: '#fff',
+        fontSize: 16,
     },
 });
 
