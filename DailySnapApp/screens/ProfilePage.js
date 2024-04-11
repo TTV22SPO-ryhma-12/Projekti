@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { fetchImages } from '../Firebase/FirebaseAuth';
+import Constants from 'expo-constants';
 
 const auth = getAuth();
 
@@ -62,6 +63,18 @@ function ProfilePage({ navigation }) {
 
     return (
         <View style={styles.container}>
+            <View style={styles.userInfoContainer}>
+                <Text style={styles.usernameText}>Username</Text>
+                <View style={styles.buttonContainer}>
+                    <TouchableOpacity style={styles.button} onPress={handleSettings}>
+                        <Text style={styles.buttonText}>Settings</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.button} onPress={showModal}>
+                        <Text style={styles.buttonText}>Sign Out</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+
             <ScrollView contentContainerStyle={styles.imageGrid}>
                 {imageUrls.map((url, index) => (
                     <TouchableOpacity key={index} onPress={() => openImage(url)}>
@@ -92,6 +105,31 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#fff',
     },
+    userInfoContainer: {
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ddd',
+    },
+    usernameText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
+    },
+    buttonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+    },
+    button: {
+        backgroundColor: '#007bff',
+        padding: 10,
+        borderRadius: 5,
+        width: '45%',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#ffffff',
+        fontSize: 16,
+    },
     imageGrid: {
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -120,6 +158,7 @@ const styles = StyleSheet.create({
         zIndex: 999,
     },
     closeButtonText: {
+        paddingTop: Constants.statusBarHeight,
         color: '#fff',
         fontSize: 16,
     },
