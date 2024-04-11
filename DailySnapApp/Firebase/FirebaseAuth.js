@@ -135,6 +135,21 @@ const deleteUserStorageData = async (userId) => {
     )
 }
 
+const deleteImage = async (imageUrl) => {
+    try {
+        
+        const imageRef = ref(storage, imageUrl);
+
+       
+        await deleteObject(imageRef);
+
+        console.log("Image deleted successfully");
+    } catch (error) {
+        console.error("Error deleting image:", error.message);
+        throw error;
+    }
+}
+
 export {
     auth,
     signUpWithEmailAndPassword,
@@ -143,5 +158,6 @@ export {
     uploadToFirebase,
     fetchImages,
     deleteCurrentUser,
-    deleteUserStorageData
+    deleteUserStorageData,
+    deleteImage,
 };

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
 import { getAuth } from 'firebase/auth';
-import { fetchImages } from '../Firebase/FirebaseAuth';
+import { fetchImages, deleteImage } from '../Firebase/FirebaseAuth'; // Import the deleteImage function
 import Constants from 'expo-constants';
 
 const auth = getAuth();
@@ -61,6 +61,40 @@ function ProfilePage({ navigation }) {
         setModalVisible(true);
     };
 
+    const handleDeleteImage = () => {
+        // Display a confirmation alert before deleting the image
+        Alert.alert(
+            "Delete Image",
+            "Are you sure you want to delete this image?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Deletion canceled"),
+                    style: "cancel"
+                },
+                {
+                    text: "Delete",
+                    onPress: async () => {
+                        try {
+                            await deleteImage(selectedImage);
+    
+                            setImageUrls(prevUrls => prevUrls.filter(url => url !== selectedImage));
+
+                            setModalVisible(false);
+    
+                            Alert.alert("Image Deleted", "The image has been successfully deleted.");
+                        } catch (error) {
+                            console.error("Error deleting image:", error.message);
+                            Alert.alert("Error", "An error occurred while deleting the image. Please try again later.");
+                        }
+                    },
+                    style: "destructive"
+                }
+            ]
+        );
+    };
+    
+
     return (
         <View style={styles.container}>
             <View style={styles.userInfoContainer}>
@@ -94,6 +128,9 @@ function ProfilePage({ navigation }) {
                         <Text style={styles.closeButtonText}>Close</Text>
                     </TouchableOpacity>
                     <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+                    <TouchableOpacity onPress={handleDeleteImage} style={styles.deleteButton}>
+                        <Text style={styles.deleteButtonText}>Delete</Text>
+                    </TouchableOpacity>
                 </View>
             </Modal>
         </View>
@@ -159,6 +196,18 @@ const styles = StyleSheet.create({
     },
     closeButtonText: {
         paddingTop: Constants.statusBarHeight,
+        color: '#fff',
+        fontSize: 16,
+    },
+    deleteButton: {
+        position: 'absolute',
+        bottom: 30,
+        backgroundColor: '#ff0000',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 5,
+    },
+    deleteButtonText: {
         color: '#fff',
         fontSize: 16,
     },
