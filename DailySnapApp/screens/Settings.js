@@ -2,9 +2,9 @@ import { StyleSheet, View, Text, TextInput, Button, StatusBar } from 'react-nati
 
 
 
-export default function Settings(){
+export default function Settings() {
 
-    return(
+    return (
         <View style={styles.home}>
             <Text>Tervetuloa asetuksiin</Text>
         </View>

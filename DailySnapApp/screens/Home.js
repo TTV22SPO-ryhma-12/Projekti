@@ -3,9 +3,9 @@ import { CameraComponent } from '../Components/camera';
 
 
 
-export default function Home(){
+export default function Home() {
 
-    return(
+    return (
         <View style={styles.home}>
             <Text>Tervetuloa kotisivulle</Text>
             <CameraComponent />
