@@ -7,7 +7,6 @@ function CameraComponent() {
   const [permission, requestPermission] = ImagePicker.useCameraPermissions();
 
 
-
   const takePicture = async () => {
     if (permission?.status === ImagePicker.PermissionStatus.GRANTED) {
       const cameraResp = await ImagePicker.launchCameraAsync({

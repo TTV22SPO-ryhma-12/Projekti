@@ -53,6 +53,7 @@ function ProfilePage({ navigation }) {
 
     const handleSettings = () => {
         navigation.navigate('Settings');
+        console.log("settings screen opened")
     };
 
     const openImage = (url) => {

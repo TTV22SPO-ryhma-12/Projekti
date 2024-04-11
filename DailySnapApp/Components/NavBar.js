@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, View, Image, TouchableOpacity, Text, StatusBar } from 'react-native';
+
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
+
 
 StatusBar.setBarStyle('light-content', true);
 
@@ -9,6 +11,7 @@ const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
   const navigation = useNavigation();
 
   const goToProfile = () => {
+
     navigation.navigate('Profile');
   };
 
