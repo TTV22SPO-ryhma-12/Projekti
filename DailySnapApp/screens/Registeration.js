@@ -18,7 +18,7 @@ function RegistrationForm() {
             await signUpWithEmailAndPassword(auth, email, password);
             setSuccessMessage('User has been registered');
             console.log('rekisteröinti onnistui')
-            
+
         } catch (error) {
             setError(error.message);
         } finally {

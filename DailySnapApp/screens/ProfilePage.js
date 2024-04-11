@@ -52,7 +52,6 @@ function ProfilePage({ navigation }) {
     };
 
     const handleSettings = () => {
-        // Navigate to the settings screen
         navigation.navigate('Settings');
     };
 
