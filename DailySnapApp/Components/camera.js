@@ -17,8 +17,8 @@ function CameraComponent() {
 
       if (!cameraResp.canceled) {
         const { uri } = cameraResp.assets[0]
-        const fileName = uri.split('/').pop();
-        const uploadResp = await uploadToFirebase(uri, `${auth.currentUser.uid}/${fileName}`);
+        const userId = auth.currentUser ? auth.currentUser.uid : 'unknown';
+        const uploadResp = await uploadToFirebase(uri, userId);
         console.log(uploadResp);
 
       }
