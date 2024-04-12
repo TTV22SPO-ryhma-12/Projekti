@@ -10,11 +10,15 @@ import Home from './screens/Home';
 import ProfilePage from './screens/ProfilePage';
 import  RegistrationForm  from './screens/Registeration'; 
 import Settings from './screens/Settings';
+import { ThemeProvider, useTheme } from './Components/ThemeContext';
+
 
 // Create a stack navigator
 const Stack = createStackNavigator();
 
+
 export default function App() {
+
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   useEffect(() => {
@@ -35,11 +39,15 @@ export default function App() {
     // `isSignedIn` will automatically be set to false by the auth listener
   };
 
+
+  
+
   return (
-    <NavigationContainer>
+    <ThemeProvider>
+    <NavigationContainer theme={styles.DarkTheme}>
       <View style={styles.container}>
-        <StatusBar backgroundColor="#000" barStyle="light-content" />
-        <Stack.Navigator>
+        <StatusBar  />
+        <Stack.Navigator >
           {isSignedIn ? (
             <>
               <Stack.Screen name="Home" component={Home} />
@@ -56,12 +64,26 @@ export default function App() {
         <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleSignIn} onSignOut={handleSignOut} />
       </View>
     </NavigationContainer>
+    </ThemeProvider>
   );
 }
+
+
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  DarkTheme: {
+    dark: true,
+    colors: {
+      primary: 'white',
+      background: 'black',
+      card: 'black',
+      text: 'white',
+      border: 'black',
+      notification: 'red',
+    },
   },
 });

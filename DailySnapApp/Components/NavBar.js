@@ -3,11 +3,13 @@ import { StyleSheet, View, Image, TouchableOpacity, Text, StatusBar } from 'reac
 
 import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
+import { useTheme } from './ThemeContext';
 
 
 StatusBar.setBarStyle('light-content', true);
 
 const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
+  const { isDarkMode } = useTheme();
   const navigation = useNavigation();
 
   const goToProfile = () => {
@@ -16,7 +18,7 @@ const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
   };
 
   return (
-    <View style={styles.navbar}>
+    <View style={[styles.navbar, { backgroundcolor: isDarkMode ? '#333' : '#000'}]}>
       <Text style={styles.navText}>DailySnap</Text>
       {isSignedIn ? (
         <TouchableOpacity onPress={goToProfile}>
@@ -38,7 +40,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#fff',
     flexDirection: 'row',
   },
   navText: {
@@ -49,9 +51,9 @@ const styles = StyleSheet.create({
     color: '#fff'
   },
   signInImage: {
-    width: 30,
-    height: 30,
-    marginRight: 10,
+    width: 32,
+    height: 32,
+    marginRight: 20,
   },
 });
 

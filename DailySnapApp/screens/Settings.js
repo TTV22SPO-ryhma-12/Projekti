@@ -1,10 +1,12 @@
-import { StyleSheet, View, Text, TextInput, Button, StatusBar, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, StatusBar, Alert, Switch } from 'react-native';
 import React from 'react';
 import { deleteCurrentUser, auth, deleteUserStorageData } from '../Firebase/FirebaseAuth';
+import { useTheme } from '../Components/ThemeContext';
 
 
 
 export default function Settings() {
+    const { isDarkMode, toggleTheme } = useTheme();
 
     const handleDeleteAccount = async () => {
         Alert.alert(
@@ -36,8 +38,9 @@ export default function Settings() {
     };
 
     return (
-        <View style={styles.home}>
-            <Text>Tervetuloa asetuksiin</Text>
+        <View style={[styles.home, { backgroundColor: isDarkMode ? '#333' : '#FFF'}]}>
+            <Text style={{color: isDarkMode ? '#FFF' : '#000'}}>Tervetuloa asetuksiin</Text>
+            <Switch value={isDarkMode} onValueChange={toggleTheme} />
             <Button title="Delete Account" onPress={handleDeleteAccount} />
         </View>
     )

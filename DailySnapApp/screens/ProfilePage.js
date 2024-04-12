@@ -3,10 +3,12 @@ import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dim
 import { getAuth } from 'firebase/auth';
 import { fetchImages } from '../Firebase/FirebaseAuth';
 import Constants from 'expo-constants';
+import { useTheme } from '../Components/ThemeContext';
 
 const auth = getAuth();
 
 function ProfilePage({ navigation }) {
+    const { isDarkMode } = useTheme();
     const [imageUrls, setImageUrls] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState('');
@@ -62,9 +64,9 @@ function ProfilePage({ navigation }) {
     };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.userInfoContainer}>
-                <Text style={styles.usernameText}>Username</Text>
+        <View style={[styles.container, { backgroundColor: isDarkMode ? '#333' : '#FFF'}]}>
+            <View style={[styles.userInfoContainer, { backgroundColor: isDarkMode ? '#333' : '#FFF'}]}>
+                <Text style={[styles.usernameText,{color: isDarkMode ? '#FFF' : '#000'}]}>Username</Text>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={handleSettings}>
                         <Text style={styles.buttonText}>Settings</Text>
@@ -109,6 +111,7 @@ const styles = StyleSheet.create({
         padding: 20,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
+        backgroundColor: '#FFF',
     },
     usernameText: {
         fontSize: 18,

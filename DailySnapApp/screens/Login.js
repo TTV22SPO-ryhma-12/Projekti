@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView, Text, View, TextInput, Button, StyleSheet } from 'react-native';
+import { useTheme } from '../Components/ThemeContext';
 
 
 const auth = getAuth();
 
 export default function LoginForm({ navigation }) {
+    const { isDarkMode } = useTheme();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -31,17 +33,17 @@ export default function LoginForm({ navigation }) {
 
     return (
         <SafeAreaView edges={['top']} style={styles.container}>
-            <View>
-                <Text style={styles.heading}>Login</Text>
+            <View style={{backgroundColor: isDarkMode ? '#333' : '#FFF'}}>
+                <Text style={[styles.heading,  { color: isDarkMode ? '#FFF' : '#000'}]}>Login</Text>
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: isDarkMode ? '#FFF' : '#000'}]}
                     placeholder="Email"
                     onChangeText={setEmail}
                     value={email}
                     accessibilityLabel="Email Input"
                 />
                 <TextInput
-                    style={styles.input}
+                    style={[styles.input, { color: isDarkMode ? '#FFF' : '#000'}]}
                     placeholder="Password"
                     onChangeText={setPassword}
                     value={password}
@@ -79,7 +81,7 @@ const styles = StyleSheet.create({
     },
     input: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: 'black',
         borderWidth: 2,
         marginBottom: 20,
     },
