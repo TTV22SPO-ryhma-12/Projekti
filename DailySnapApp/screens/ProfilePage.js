@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
 import { getAuth } from 'firebase/auth';
-import { fetchImages, deleteImage } from '../Firebase/FirebaseAuth'; // Import the deleteImage function
+import { fetchImages, deleteImage } from '../Firebase/FirebaseAuth';
 import Constants from 'expo-constants';
 
 const auth = getAuth();
@@ -62,7 +62,6 @@ function ProfilePage({ navigation }) {
     };
 
     const handleDeleteImage = () => {
-        // Display a confirmation alert before deleting the image
         Alert.alert(
             "Delete Image",
             "Are you sure you want to delete this image?",
