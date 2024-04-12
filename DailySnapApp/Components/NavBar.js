@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderBottomWidth: 1,
-    borderBottomColor: '#fff',
+    borderBottomColor: '#000',
     flexDirection: 'row',
   },
   navText: {

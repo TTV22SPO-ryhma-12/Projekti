@@ -45,7 +45,7 @@ export default function App() {
   return (
     <ThemeProvider>
     <NavigationContainer theme={styles.DarkTheme}>
-      <View style={styles.container}>
+      <View style={styles.container }>
         <StatusBar  />
         <Stack.Navigator >
           {isSignedIn ? (
@@ -56,8 +56,8 @@ export default function App() {
             </>
           ) : (
             <>
-              <Stack.Screen name="Login" component={LoginForm} />
-              <Stack.Screen name="Register" component={RegistrationForm} /> 
+              <Stack.Screen style={styles.Juu} name="Login" component={LoginForm} />
+              <Stack.Screen style={styles.Juu} name="Register" component={RegistrationForm} /> 
             </>
           )}
         </Stack.Navigator>
@@ -79,11 +79,23 @@ const styles = StyleSheet.create({
     dark: true,
     colors: {
       primary: 'white',
-      background: 'black',
+      background: 'white',
       card: 'black',
       text: 'white',
       border: 'black',
       notification: 'red',
     },
   },
+  Juu: {
+    dark: true,
+    colors: {
+      primary: 'white',
+      background: 'white',
+      card: 'black',
+      text: 'white',
+      border: 'black',
+      notification: 'red',
+    },
+  },
+
 });
