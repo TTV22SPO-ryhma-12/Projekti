@@ -76,16 +76,19 @@ const onAuthStateChange = (callback) => {
 /** 
  * 
  * @param {*} uri
- * @param {*} name
 */
 
-const uploadToFirebase = async (uri, name) => {
+const uploadToFirebase = async (uri, userId) => {
 
     const fetchResponse = await fetch(uri);
     const theBlob = await fetchResponse.blob();
+    const fileName = uri.split('/').pop();
     console.log(theBlob)
 
-    const storageRef = ref(storage, `images/${name}`);
+    const userImageRef = ref(storage, `images/${userId}/${fileName}`);
+    const allImagesRef = ref(storage, `allimages/${fileName}`);
+
+    const uploadImage = async (storageRef) => {
     const uploadTask = uploadBytesResumable(storageRef, theBlob);
 
     return new Promise((resolve, reject) => {
@@ -108,6 +111,10 @@ const uploadToFirebase = async (uri, name) => {
         )
     })
 
+}
+const userImageUrl = await uploadImage(userImageRef);
+const allImageUrl = await uploadImage(allImagesRef);
+return { userImageUrl, allImageUrl };
 }
 
 const deleteCurrentUser = async () => {
