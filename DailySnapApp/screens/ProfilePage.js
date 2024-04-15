@@ -14,8 +14,8 @@ function ProfilePage({ navigation }) {
     useEffect(() => {
         const fetchAndSetImages = async () => {
             try {
-                const urls = await fetchImages(`images/${auth.currentUser.uid}`);
-                setImageUrls(urls);
+                const images = await fetchImages(`images/${auth.currentUser.uid}`);
+                setImageUrls(images);
             } catch (error) {
                 console.error("Error fetching images:", error.message);
             }
@@ -77,7 +77,7 @@ function ProfilePage({ navigation }) {
                         try {
                             await deleteImage(selectedImage);
     
-                            setImageUrls(prevUrls => prevUrls.filter(url => url !== selectedImage));
+                            setImageUrls(prevImages => prevImages.filter(image => image.url !== selectedImage));
 
                             setModalVisible(false);
     
@@ -109,9 +109,9 @@ function ProfilePage({ navigation }) {
             </View>
 
             <ScrollView contentContainerStyle={styles.imageGrid}>
-                {imageUrls.map((url, index) => (
-                    <TouchableOpacity key={index} onPress={() => openImage(url)}>
-                        <Image source={{ uri: url }} style={styles.imageThumbnail} />
+                {imageUrls.map((image, index) => (
+                    <TouchableOpacity key={index} onPress={() => openImage(image.url)}>
+                        <Image source={{ uri: image.url }} style={styles.imageThumbnail} />
                     </TouchableOpacity>
                 ))}
             </ScrollView>

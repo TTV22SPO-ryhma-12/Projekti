@@ -2,10 +2,9 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, on
 import { storage } from "./FirebaseConfig";
 import { uploadBytesResumable, ref, deleteObject } from "firebase/storage";
 import { listAll, getDownloadURL } from "firebase/storage";
-
-
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 const auth = getAuth();
-
+const db = getFirestore();
 
 const signUpWithEmailAndPassword = (auth, email, password) => {
 
@@ -41,8 +40,10 @@ const fetchImages = async (path) => {
     const storageRef = ref(storage, path);
     try {
         const result = await listAll(storageRef);
-        const urlPromises = result.items.map((itemRef) => getDownloadURL(itemRef));
-        const urls = await Promise.all(urlPromises);
+        const urls = await Promise.all(result.items.map(async (itemRef) => {
+            const url = await getDownloadURL(itemRef);
+            return { url }; // Wrap the URL in an object with 'url' property
+        }));
         return urls;
     } catch (error) {
         console.error('Error fetching images:', error);
@@ -79,43 +80,55 @@ const onAuthStateChange = (callback) => {
 */
 
 const uploadToFirebase = async (uri, userId) => {
+    try {
+        // Fetch image data and create a blob
+        const fetchResponse = await fetch(uri);
+        const theBlob = await fetchResponse.blob();
+        const fileName = uri.split('/').pop();
 
-    const fetchResponse = await fetch(uri);
-    const theBlob = await fetchResponse.blob();
-    const fileName = uri.split('/').pop();
-    console.log(theBlob)
-
-    const userImageRef = ref(storage, `images/${userId}/${fileName}`);
-    const allImagesRef = ref(storage, `allimages/${fileName}`);
-
-    const uploadImage = async (storageRef) => {
-    const uploadTask = uploadBytesResumable(storageRef, theBlob);
-
-    return new Promise((resolve, reject) => {
-        uploadTask.on(
-            'state_changed',
+        // Reference for storing the image in Firebase Storage
+        const userImageRef = ref(storage, `images/${userId}/${fileName}`);
+        const allImagesRef = ref(storage, `allimages/${fileName}`);
+        
+        // Upload the image to Firebase Storage
+        const uploadTask = uploadBytesResumable(userImageRef, theBlob);
+        const uploadTaskAll = uploadBytesResumable(allImagesRef, theBlob);
+        
+        // Monitor upload progress
+        uploadTask.on('state_changed', 
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 console.log('Upload is ' + progress + '% done');
             },
             (error) => {
-                reject(error);
-            },
-            async () => {
-                const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-                resolve({
-                    downloadUrl,
-                    metadata: uploadTask.snapshot.metadata
-                });
+                console.error('Error uploading image:', error);
             }
-        )
-    })
+        );
 
-}
-const userImageUrl = await uploadImage(userImageRef);
-const allImageUrl = await uploadImage(allImagesRef);
-return { userImageUrl, allImageUrl };
-}
+        // Wait for the upload to complete
+        await uploadTask;
+        await uploadTaskAll;
+
+        // Get the download URL of the uploaded image
+        const downloadUrl = await getDownloadURL(userImageRef);
+
+        // Store image metadata in Firestore
+        const imageRef = collection(db, 'images'); // Change to 'images' collection
+        await addDoc(imageRef, {
+            userId: userId,
+            imageURL: downloadUrl,
+            likes: 0, // Initialize likes count to 0
+            liked: false // Initialize liked status to false
+        });
+
+        console.log('Image uploaded and metadata stored successfully');
+
+        return { userImageUrl: downloadUrl };
+    } catch (error) {
+        console.error('Error uploading image and storing metadata:', error);
+        throw error;
+    }
+};
 
 const deleteCurrentUser = async () => {
     const user = auth.currentUser
