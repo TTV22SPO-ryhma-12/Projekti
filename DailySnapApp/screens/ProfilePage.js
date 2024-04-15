@@ -3,6 +3,7 @@ import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dim
 import { getAuth } from 'firebase/auth';
 import { fetchImages, deleteImage } from '../Firebase/FirebaseAuth';
 import Constants from 'expo-constants';
+import { firestore, collection, addDoc, doc, setDoc, getDoc, ref, USERS } from '../Firebase/FirebaseConfig';
 
 const auth = getAuth();
 
@@ -10,6 +11,9 @@ function ProfilePage({ navigation }) {
     const [imageUrls, setImageUrls] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState('');
+    const [username, setUsername] = useState('');
+    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const fetchAndSetImages = async () => {
@@ -31,6 +35,35 @@ function ProfilePage({ navigation }) {
             console.error("Error signing out:", error.message);
         }
     };
+
+    const getUsername = async () => {
+        const userDoc = doc(firestore, USERS, auth.currentUser.uid);
+        const docSnap = await getDoc(userDoc);
+
+        if (docSnap.exists()) {
+            return docSnap.data().username;
+        } else {
+            throw new Error("User document not found");
+        }
+    };
+
+    useEffect(() => {
+        const fetchUsername = async () => {
+            try {
+                const user = auth.currentUser;
+                if (user) {
+                    const fetchedUsername = await getUsername(user.uid);
+                    setUsername(fetchedUsername);
+                } else {
+                    setUsername("NO USER");
+                }
+            } catch (error) {
+                console.error("Error fetching username:", error.message);
+            }
+            setLoading(false);
+        };
+        fetchUsername();
+    }, []);
 
     const showModal = () => {
         Alert.alert(
@@ -97,7 +130,7 @@ function ProfilePage({ navigation }) {
     return (
         <View style={styles.container}>
             <View style={styles.userInfoContainer}>
-                <Text style={styles.usernameText}>Username</Text>
+                <Text style={styles.usernameText}>{username}</Text>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={handleSettings}>
                         <Text style={styles.buttonText}>Settings</Text>
@@ -147,7 +180,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ddd',
     },
     usernameText: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
         marginBottom: 10,
     },
