@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, addDoc, serverTimestamp, } from "firebase/firestore";
+import { getFirestore, collection, addDoc, serverTimestamp, doc, setDoc, getDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { getStorage, ref, uploadString } from "firebase/storage";
@@ -26,6 +26,7 @@ initializeApp(firebaseConfig);
 const firestore = getFirestore();
 const auth = getAuth();
 const storage = getStorage();
+const USERS = 'users';
 
 
 export {
@@ -34,5 +35,10 @@ export {
   addDoc,
   serverTimestamp,
   auth,
-  storage
+  storage,
+  doc,
+  setDoc,
+  getDoc,
+  USERS,
+  ref,
 }

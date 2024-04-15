@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { SafeAreaView, Text, View, TextInput, Button, StyleSheet } from 'react-native';
+import { firestore, collection, addDoc, doc, setDoc, getDoc, ref, USERS } from '../Firebase/FirebaseConfig';
 
 
 const auth = getAuth();
@@ -70,18 +71,20 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: 'center',
-        marginHorizontal: 20,
+        marginHorizontal: 25,
     },
     heading: {
-        fontSize: 24,
+        fontSize: 25,
         marginBottom: 20,
         textAlign: 'center',
     },
     input: {
-        height: 40,
-        borderColor: 'gray',
+        height: 42,
+        borderColor: 'black',
         borderWidth: 2,
-        marginBottom: 20,
+        marginBottom: 15,
+        backgroundColor: 'white',
+        padding: 5,
     },
     error: {
         color: 'red',

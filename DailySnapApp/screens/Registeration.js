@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { getAuth } from "firebase/auth";
 import { SafeAreaView, Text, View, TextInput, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import { signUpWithEmailAndPassword } from '../Firebase/FirebaseAuth';
+import { firestore, collection, addDoc, doc, setDoc, getDoc, ref, USERS } from '../Firebase/FirebaseConfig';
 
 const auth = getAuth();
 
@@ -11,11 +12,16 @@ function RegistrationForm() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [successMessage, setSuccessMessage] = useState('');
+    const [username , setUsername] = useState('')
 
     const handleSubmit = async () => {
         try {
             setLoading(true);
-            await signUpWithEmailAndPassword(auth, email, password);
+            const user = await signUpWithEmailAndPassword(auth, email, password);
+            await setDoc(doc(firestore, USERS, user.uid), {
+                username: username,
+                email: email,
+            });
             setSuccessMessage('User has been registered');
             console.log('rekisteröinti onnistui')
 
@@ -30,6 +36,13 @@ function RegistrationForm() {
         <SafeAreaView edges={['top']} style={styles.container}>
             <View>
                 <Text style={styles.heading}>Registration</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Username"
+                    onChangeText={setUsername}
+                    value={username}
+                    accessibilityLabel="Username Input"
+                />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
