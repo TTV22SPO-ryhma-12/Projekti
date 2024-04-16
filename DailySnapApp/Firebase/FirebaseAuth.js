@@ -2,7 +2,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, on
 import { storage } from "./FirebaseConfig";
 import { uploadBytesResumable, ref, deleteObject } from "firebase/storage";
 import { listAll, getDownloadURL } from "firebase/storage";
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, doc, setDoc } from 'firebase/firestore';
 const auth = getAuth();
 const db = getFirestore();
 
@@ -110,13 +110,16 @@ const uploadToFirebase = async (uri, userId) => {
         await uploadTaskAll;
 
         // Get the download URL of the uploaded image
-        const downloadUrl = await getDownloadURL(userImageRef);
+        const downloadUrl = await getDownloadURL(allImagesRef);
+
+        // Encode the download URL to create a valid Firestore document ID
+        const docId = encodeURIComponent(downloadUrl);
 
         // Store image metadata in Firestore
-        const imageRef = collection(db, 'images'); // Change to 'images' collection
-        await addDoc(imageRef, {
+        const imageRef = doc(db, 'images', docId);
+        await setDoc(imageRef, {
             userId: userId,
-            imageURL: downloadUrl,
+            docId: downloadUrl,
             likes: 0, // Initialize likes count to 0
             liked: false // Initialize liked status to false
         });
@@ -129,6 +132,8 @@ const uploadToFirebase = async (uri, userId) => {
         throw error;
     }
 };
+
+
 
 const deleteCurrentUser = async () => {
     const user = auth.currentUser

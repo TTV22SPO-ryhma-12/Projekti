@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, View, Text, ScrollView, Image, TouchableOpacity, Button } from 'react-native';
-import { getFirestore, collection, doc, setDoc, updateDoc } from 'firebase/firestore';
-import { fetchImages } from '../Firebase/FirebaseAuth';
+import { getFirestore, collection, doc, setDoc, updateDoc, addDoc } from 'firebase/firestore';
+import { fetchImages, updateLikesInFirestore } from '../Firebase/FirebaseAuth';
 
 const db = getFirestore();
 
@@ -29,6 +29,18 @@ export default function Home() {
         fetchImagesFromFirebase();
     }, []);
 
+    const updateLikesInFirestore = async (url, { likes, liked }) => {
+        try {
+            // Encode the URL to create a valid Firestore document ID
+            const docId = encodeURIComponent(url);
+            const imageRef = doc(db, 'images', docId);
+            await setDoc(imageRef, { likes, liked }, { merge: true });
+        } catch (error) {
+            console.error("Error updating likes in Firestore:", error.message);
+            throw error;
+        }
+    };
+
     const handleLike = async (url) => {
         try {
             const updatedLikes = { ...likes };
@@ -47,16 +59,7 @@ export default function Home() {
         }
     };
 
-    const updateLikesInFirestore = async (url, { likes, liked }) => {
-        try {
-            const imageLikesRef = doc(db, 'imageLikes', url);
-            await setDoc(imageLikesRef, { likes, liked }, { merge: true });
-        } catch (error) {
-            console.error("Error updating likes in Firestore:", error.message);
-            throw error;
-        }
-    };
-
+ 
     return (
         <View style={styles.container}>
             <ScrollView>
