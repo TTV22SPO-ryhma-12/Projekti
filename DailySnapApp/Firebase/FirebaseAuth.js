@@ -121,7 +121,6 @@ const uploadToFirebase = async (uri, userId) => {
             userId: userId,
             docId: downloadUrl,
             likes: 0, // Initialize likes count to 0
-            liked: false // Initialize liked status to false
         });
 
         console.log('Image uploaded and metadata stored successfully');
