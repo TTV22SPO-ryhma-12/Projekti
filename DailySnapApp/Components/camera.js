@@ -1,49 +1,48 @@
-import React from 'react';
-import { Text, View, StyleSheet, Button, StatusBar, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { Text, View, StyleSheet, Button, StatusBar, TouchableOpacity, Image, TextInput } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { uploadToFirebase, auth } from '../Firebase/FirebaseAuth';
+import { useNavigation } from '@react-navigation/native';
 
 function CameraComponent() {
-  const [permission, requestPermission] = ImagePicker.useCameraPermissions();
-
+  const [imageUri, setImageUri] = useState(null); 
+  const navigation = useNavigation();
 
   const takePicture = async () => {
-    if (permission?.status === ImagePicker.PermissionStatus.GRANTED) {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      alert("We need to access your camera to take a picture");
+      return;
+      }
+
       const cameraResp = await ImagePicker.launchCameraAsync({
-        allowsEditing: true,
+        allowsEditing: false,
         mediaTypes: ImagePicker.MediaTypeOptions.All,
         quality: 1,
-      });
+      })
+      console.log("Camera response:", cameraResp);
 
-      if (!cameraResp.canceled) {
-        const { uri } = cameraResp.assets[0]
-        const userId = auth.currentUser ? auth.currentUser.uid : 'unknown';
-        const uploadResp = await uploadToFirebase(uri, userId);
-        console.log(uploadResp);
-
+      if (!cameraResp.canceled && cameraResp.assets && cameraResp.assets.length > 0) {
+        const uri = cameraResp.assets[0].uri;
+        setImageUri(uri); 
+        console.log("Image URI:", uri);
+        navigation.navigate('Editor', { imageUri: uri });
+      } else {
+        console.log("Camera use was cancelled or no image was taken");
       }
-    } else {
-      console.log("Camera permission is not granted");
-      requestPermission();
-    }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
-      {permission?.status === ImagePicker.PermissionStatus.GRANTED ? (
         <TouchableOpacity onPress={takePicture}>
           <Image source={require('../assets/camera.png')} style={styles.cameraIcon} />
+          <Text>Take Picture</Text>
         </TouchableOpacity>
-      ) : (
-        <View>
-          <Text>No access to camera. Need permission.</Text>
-          <Button title="Request permission" onPress={requestPermission} />
-        </View>
-      )}
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -54,6 +53,10 @@ const styles = StyleSheet.create({
   cameraIcon: {
     width: 50,
     height: 50,
+  },
+  preview: {
+    width: 300,
+    height: 300,
   },
 });
 

@@ -17,13 +17,14 @@ function ProfilePage({ navigation }) {
 
     useEffect(() => {
         const fetchAndSetImages = async () => {
-            try {
-                const urls = await fetchImages(`images/${auth.currentUser.uid}`);
-                setImageUrls(urls);
-            } catch (error) {
-                console.error("Error fetching images:", error.message);
-            }
-        };
+            const userId = auth.currentUser.uid
+            console.log('User ID:', userId);
+            if (userId) {
+                const fetchedImages = await fetchImages(`${userId}`);
+            console.log('Fetched User Images:', fetchedImages); 
+            setImageUrls(fetchedImages)
+        }
+    };
         fetchAndSetImages();
     }, []);
 
@@ -90,8 +91,10 @@ function ProfilePage({ navigation }) {
     };
 
     const openImage = (url) => {
+        if(url) {
         setSelectedImage(url);
         setModalVisible(true);
+        }
     };
 
     const handleDeleteImage = () => {
@@ -142,9 +145,9 @@ function ProfilePage({ navigation }) {
             </View>
 
             <ScrollView contentContainerStyle={styles.imageGrid}>
-                {imageUrls.map((url, index) => (
-                    <TouchableOpacity key={index} onPress={() => openImage(url)}>
-                        <Image source={{ uri: url }} style={styles.imageThumbnail} />
+                {imageUrls.map((item, index) => (
+                    <TouchableOpacity key={index} onPress={() => openImage(item.url)}>
+                            <Image source={{ uri: item.url }} style={styles.imageThumbnail} />
                     </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -159,7 +162,12 @@ function ProfilePage({ navigation }) {
                     <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
                         <Text style={styles.closeButtonText}>Close</Text>
                     </TouchableOpacity>
-                    <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+                    {selectedImage ?(
+                        <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
+                    ):(
+                        <Text>No image selected</Text>
+                    
+                    )}
                     <TouchableOpacity onPress={handleDeleteImage} style={styles.deleteButton}>
                         <Text style={styles.deleteButtonText}>Delete</Text>
                     </TouchableOpacity>
@@ -223,19 +231,19 @@ const styles = StyleSheet.create({
     closeButton: {
         position: 'absolute',
         top: 30,
-        right: 20,
-        zIndex: 999,
-    },
-    closeButtonText: {
-        paddingTop: Constants.statusBarHeight,
-        color: '#fff',
-        fontSize: 16,
-    },
-    deleteButton: {
-        position: 'absolute',
-        bottom: 30,
-        backgroundColor: '#ff0000',
-        paddingVertical: 10,
+        right: 20, 
+        zIndex: 999, 
+    }, 
+    closeButtonText: { 
+        paddingTop: Constants.statusBarHeight, 
+        color: '#fff', 
+        fontSize: 16, 
+    }, 
+    deleteButton: { 
+        position: 'absolute', 
+        bottom: 30, 
+        backgroundColor: '#ff0000', 
+        paddingVertical: 10, 
         paddingHorizontal: 20,
         borderRadius: 5,
     },
