@@ -1,4 +1,4 @@
-import { StyleSheet, View, Text, TextInput, Button, StatusBar, ScrollView, Image, TouchableOpacity} from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, StatusBar, ScrollView, Image, TouchableOpacity, RefreshControl} from 'react-native';
 import { CameraComponent } from '../Components/camera';
 import { fetchImages } from '../Firebase/FirebaseAuth';
 import React, { useEffect, useState } from 'react';
@@ -13,11 +13,20 @@ export default function Home() {
     const [modalVisible, setModalVisible] = useState(false);
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(true);
+    const [refreshing, setRefreshing] = useState(false);
 
     const openImage = (url) => {
         setSelectedImage(url);
         setModalVisible(true);
     };
+
+    const onRefresh = React.useCallback(() => {
+        setRefreshing(true);
+        setTimeout(() => {
+          setRefreshing(false);
+          console.log("Refreshing page.")
+        }, 2000);
+      }, []);
 
     useEffect(() => {
         const fetchImagesFromFirebase = async () => {
@@ -71,7 +80,10 @@ export default function Home() {
     return (
         <View style={styles.home}>
             <Text>Tervetuloa kotisivulle</Text>
-            <ScrollView style={styles.scroll}>
+            <ScrollView style={styles.scroll}
+            refreshControl={
+                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+              }>
             {images.map((image, index) => (
                 <View key={index} style={styles.imageContainer}>
                     <Image source={{ uri: image.url }} style={styles.image} />
