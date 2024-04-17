@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
 import { getAuth } from 'firebase/auth';
-import { fetchImages, deleteImage } from '../Firebase/FirebaseAuth';
+import { fetchImages, deleteImage, getUsername } from '../Firebase/FirebaseAuth';
 import Constants from 'expo-constants';
-import { firestore, collection, addDoc, doc, setDoc, getDoc, ref, USERS } from '../Firebase/FirebaseConfig';
+import { firestore, collection, addDoc, doc, setDoc, getDoc, ref, USERS, getDocs } from '../Firebase/FirebaseConfig';
 
 const auth = getAuth();
 
@@ -13,6 +13,7 @@ function ProfilePage({ navigation }) {
     const [selectedImage, setSelectedImage] = useState('');
     const [username, setUsername] = useState('');
     const [loading, setLoading] = useState(true);
+    const [caption, setCaption] = useState('');
 
 
     useEffect(() => {
@@ -96,7 +97,8 @@ function ProfilePage({ navigation }) {
         setModalVisible(true);
         }
     };
-
+ 
+    
     const handleDeleteImage = () => {
         Alert.alert(
             "Delete Image",

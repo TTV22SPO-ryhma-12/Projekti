@@ -2,8 +2,7 @@ import { StyleSheet, View, Text, TextInput, Button, StatusBar, ScrollView, Image
 import { CameraComponent } from '../Components/camera';
 import { fetchImages } from '../Firebase/FirebaseAuth';
 import React, { useEffect, useState } from 'react';
-import { auth, fetchUsername, } from '../Firebase/FirebaseAuth';
-import { getDoc, doc, firestore, USERS } from '../Firebase/FirebaseConfig';
+import { auth, fetchUsername, fetchImageData } from '../Firebase/FirebaseAuth';
 
 
 
@@ -21,10 +20,15 @@ export default function Home() {
 
     useEffect(() => {
         const fetchImagesFromFirebase = async () => {
+            user = auth.currentUser;
+            if (user) {
                 const fetchedImages = await fetchImages();
                 console.log('fetched Images', fetchedImages);
                 setImages(fetchedImages);
-        };
+            } else {
+                console.log('No user signed in');
+            }
+    };
         fetchImagesFromFirebase();
     }, []);
 
@@ -40,33 +44,18 @@ export default function Home() {
     } , []);
 
     useEffect(() => {
-        const fetchUsername = async () => {
-            try {
-                const user = auth.currentUser;
-                if (user) {
-                    const fetchedUsername = await getUsername(user.uid);
-                    setUsername(fetchedUsername);
-                } else {
-                    setUsername("NO USER");
-                }
-            } catch (error) {
-                console.error("Error fetching username:", error.message);
-            }
-            setLoading(false);
-        };
-        fetchUsername();
+        console.log("Final images data:", images);
+    }, [images]);
+
+    useEffect(() => {
+        fetchImageData().then(images => {
+            setImages(images);
+            console.log('Images with details:', images);
+        }).catch(error => {
+            console.error('Erroriii', error);
+        });
     }, []);
 
-    const getUsername = async () => {
-        const userDoc = doc(firestore, USERS, auth.currentUser.uid);
-        const docSnap = await getDoc(userDoc);
-
-        if (docSnap.exists()) {
-            return docSnap.data().username;
-        } else {
-            throw new Error("User document not found");
-        }
-    };
 
     return (
         <View style={styles.home}>
@@ -74,8 +63,11 @@ export default function Home() {
             <ScrollView style={styles.scroll}>
             {images.map((image, index) => (
                 <View key={index} style={styles.imageContainer}>
-                    <Image source={{ uri: image.url }} style={styles.image} />
-                    <Text style={styles.username}>{username}{image.username}</Text>
+                    <Image source={{ uri: image.url}} style={styles.image} />
+                    <TouchableOpacity onPress={() => openImage(image.url)}>
+                        <Text>Open Image</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.username}>{image.username}</Text>
                     <Text style={styles.caption}>{image.caption}</Text>
                 </View>
             ))}
@@ -84,7 +76,6 @@ export default function Home() {
         
     )
 }
-
 
 const styles = StyleSheet.create({
     home: {
