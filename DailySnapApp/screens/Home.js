@@ -1,36 +1,39 @@
-import { StyleSheet, View, Text, TextInput, Button, StatusBar, ScrollView, Image, TouchableOpacity} from 'react-native';
-import { CameraComponent } from '../Components/camera';
-import { fetchImages } from '../Firebase/FirebaseAuth';
 import React, { useEffect, useState } from 'react';
 import { auth, fetchUsername, fetchImageData } from '../Firebase/FirebaseAuth';
+import { StyleSheet, View, Text, ScrollView, Image, Button } from 'react-native';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { fetchImages } from '../Firebase/FirebaseAuth';
+import { getAuth } from 'firebase/auth';
 
 
+const auth = getAuth();
+const db = getFirestore();
 
 export default function Home() {
     const [images, setImages] = useState([]);
-    const [selectedImage, setSelectedImage] = useState('');
-    const [modalVisible, setModalVisible] = useState(false);
-    const [username, setUsername] = useState('');
-    const [loading, setLoading] = useState(true);
-
-    const openImage = (url) => {
-        setSelectedImage(url);
-        setModalVisible(true);
-    };
 
     useEffect(() => {
         const fetchImagesFromFirebase = async () => {
-            user = auth.currentUser;
-            if (user) {
-                const fetchedImages = await fetchImages();
-                console.log('fetched Images', fetchedImages);
-                setImages(fetchedImages);
-            } else {
-                console.log('No user signed in');
+          user = auth.currentUser
+          try {
+                const fetchedImages = await fetchImages('allimages');
+                const imagesWithLikes = await Promise.all(fetchedImages.map(async (image) => {
+                    const docId = encodeURIComponent(image.url);
+                    const likesRef = doc(db, 'likes', docId);
+                    const docSnapshot = await getDoc(likesRef);
+                    const likesData = docSnapshot.exists() ? docSnapshot.data() : { likes: {}, likesCount: 0 };
+                    const likedByCurrentUser = likesData.likes && likesData.likes[auth.currentUser.uid] ? true : false;
+                    return { ...image, likesCount: likesData.likesCount, likedByCurrentUser };
+                }));
+                setImages(imagesWithLikes);
+            } catch (error) {
+                console.error("Error fetching images:", error.message);
             }
-    };
+        };
+
         fetchImagesFromFirebase();
     }, []);
+
 
     useEffect(() => {
         const checkUser = async () => {
@@ -55,6 +58,34 @@ export default function Home() {
             console.error('Erroriii', error);
         });
     }, []);
+  
+      const handleLike = async (url, likedByCurrentUser) => {
+        try {
+            const userId = auth.currentUser.uid; // Get the ID of the currently authenticated user
+            const liked = !likedByCurrentUser; // Toggle like for the current user
+            const docId = encodeURIComponent(url);
+            const likesRef = doc(db, 'likes', docId);
+            const docSnapshot = await getDoc(likesRef);
+            const likesData = docSnapshot.exists() ? docSnapshot.data() : { likes: {}, likesCount: 0 };
+            const currentLikes = likesData.likes || {};
+            currentLikes[userId] = liked;
+            const likesCount = Object.values(currentLikes).filter(like => like).length;
+            await setDoc(likesRef, {
+                likes: currentLikes,
+                likesCount
+            });
+            setImages(prevImages => {
+                return prevImages.map(image => {
+                    if (image.url === url) {
+                        return { ...image, likesCount, likedByCurrentUser: liked };
+                    }
+                    return image;
+                });
+            });
+        } catch (error) {
+            console.error("Error updating like:", error.message);
+        }
+    };
 
 
     return (
@@ -64,6 +95,8 @@ export default function Home() {
             {images.map((image, index) => (
                 <View key={index} style={styles.imageContainer}>
                     <Image source={{ uri: image.url}} style={styles.image} />
+                    <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
+                    <Text>Likes: {image.likesCount}</Text>
                     <TouchableOpacity onPress={() => openImage(image.url)}>
                         <Text>Open Image</Text>
                     </TouchableOpacity>
@@ -71,39 +104,21 @@ export default function Home() {
                     <Text style={styles.caption}>{image.caption}</Text>
                 </View>
             ))}
+
             </ScrollView>
         </View>
-        
-    )
+    );
 }
 
 const styles = StyleSheet.create({
-    home: {
+    container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-    },
-    scroll: {
-        width: "100%",
-        
     },
     image: {
-        width: "100%",
-        height: 400,
-        marginVertical: 5,
+        width: 300,
+        height: 300,
+        marginBottom: 10,
     },
-    imageContainer: {
-        marginVertical: 10,
-        padding: 10,
-        backgroundColor: 'white',
-    },
-    caption: {
-        fontSize: 16,
-        color: 'gray',
-    },
-    username: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-})
+});
