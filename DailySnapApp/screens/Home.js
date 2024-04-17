@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
+import { auth, fetchUsername, fetchImageData } from '../Firebase/FirebaseAuth';
 import { StyleSheet, View, Text, ScrollView, Image, Button } from 'react-native';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { fetchImages } from '../Firebase/FirebaseAuth';
 import { getAuth } from 'firebase/auth';
+
 
 const auth = getAuth();
 const db = getFirestore();
@@ -12,7 +14,8 @@ export default function Home() {
 
     useEffect(() => {
         const fetchImagesFromFirebase = async () => {
-            try {
+          user = auth.currentUser
+          try {
                 const fetchedImages = await fetchImages('allimages');
                 const imagesWithLikes = await Promise.all(fetchedImages.map(async (image) => {
                     const docId = encodeURIComponent(image.url);
@@ -31,7 +34,32 @@ export default function Home() {
         fetchImagesFromFirebase();
     }, []);
 
-    const handleLike = async (url, likedByCurrentUser) => {
+
+    useEffect(() => {
+        const checkUser = async () => {
+            const user = auth.currentUser;
+            if (user) {
+                const username = await fetchUsername(user.uid);
+                console.log('username', username);
+        }
+        }
+        checkUser();
+    } , []);
+
+    useEffect(() => {
+        console.log("Final images data:", images);
+    }, [images]);
+
+    useEffect(() => {
+        fetchImageData().then(images => {
+            setImages(images);
+            console.log('Images with details:', images);
+        }).catch(error => {
+            console.error('Erroriii', error);
+        });
+    }, []);
+  
+      const handleLike = async (url, likedByCurrentUser) => {
         try {
             const userId = auth.currentUser.uid; // Get the ID of the currently authenticated user
             const liked = !likedByCurrentUser; // Toggle like for the current user
@@ -59,16 +87,24 @@ export default function Home() {
         }
     };
 
+
     return (
-        <View style={styles.container}>
-            <ScrollView>
-                {images.map((image, index) => (
-                    <View key={index}>
-                        <Image source={{ uri: image.url }} style={styles.image} />
-                        <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
-                        <Text>Likes: {image.likesCount}</Text>
-                    </View>
-                ))}
+        <View style={styles.home}>
+            <Text>Tervetuloa kotisivulle</Text>
+            <ScrollView style={styles.scroll}>
+            {images.map((image, index) => (
+                <View key={index} style={styles.imageContainer}>
+                    <Image source={{ uri: image.url}} style={styles.image} />
+                    <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
+                    <Text>Likes: {image.likesCount}</Text>
+                    <TouchableOpacity onPress={() => openImage(image.url)}>
+                        <Text>Open Image</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.username}>{image.username}</Text>
+                    <Text style={styles.caption}>{image.caption}</Text>
+                </View>
+            ))}
+
             </ScrollView>
         </View>
     );
