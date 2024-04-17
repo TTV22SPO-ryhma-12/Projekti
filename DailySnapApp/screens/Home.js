@@ -1,75 +1,98 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, Image, TouchableOpacity, Button } from 'react-native';
-import { getFirestore, collection, doc, setDoc, updateDoc, addDoc } from 'firebase/firestore';
-import { fetchImages, updateLikesInFirestore } from '../Firebase/FirebaseAuth';
+import { StyleSheet, View, Text, ScrollView, Image, Button } from 'react-native';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { fetchImages } from '../Firebase/FirebaseAuth';
+import { getAuth } from 'firebase/auth';
 
+const auth = getAuth();
 const db = getFirestore();
 
 export default function Home() {
     const [images, setImages] = useState([]);
-    const [likes, setLikes] = useState({});
-    
+
     useEffect(() => {
         const fetchImagesFromFirebase = async () => {
             try {
                 const fetchedImages = await fetchImages('allimages');
-                setImages(fetchedImages);
-    
-                // Initialize likes object with default values
-                const initialLikes = fetchedImages.reduce((acc, image) => {
-                    acc[image.url] = { likes: 0, liked: false };
-                    return acc;
-                }, {});
-                setLikes(initialLikes);
+                const imagesWithLikes = await Promise.all(fetchedImages.map(async (image) => {
+                    const docId = encodeURIComponent(image.url);
+                    const likesRef = doc(db, 'likes', docId);
+                    const docSnapshot = await getDoc(likesRef);
+                    const likesData = docSnapshot.exists() ? docSnapshot.data() : { likes: {}, likesCount: 0 };
+                    const likedByCurrentUser = likesData.likes && likesData.likes[auth.currentUser.uid] ? true : false;
+                    return { ...image, likesCount: likesData.likesCount, likedByCurrentUser };
+                }));
+                setImages(imagesWithLikes);
             } catch (error) {
                 console.error("Error fetching images:", error.message);
             }
         };
-    
+
         fetchImagesFromFirebase();
     }, []);
 
-    const updateLikesInFirestore = async (url, { likes, liked }) => {
+    const updateLikesInFirestore = async (url, userId, liked) => {
         try {
-            // Encode the URL to create a valid Firestore document ID
             const docId = encodeURIComponent(url);
-            const imageRef = doc(db, 'images', docId);
-            await setDoc(imageRef, { likes, liked }, { merge: true });
+            const likesRef = doc(db, 'likes', docId);
+            const docSnapshot = await getDoc(likesRef);
+    
+            // Get current likes data
+            const currentLikes = docSnapshot.exists() ? docSnapshot.data().likes || {} : {};
+    
+            // Update user's like status
+            currentLikes[userId] = liked;
+    
+            // Calculate likes count
+            const likesCount = Object.values(currentLikes).filter(like => like).length;
+    
+            // Update Firestore document with updated likes data
+            await setDoc(likesRef, {
+                likes: currentLikes,
+                likesCount
+            });
         } catch (error) {
             console.error("Error updating likes in Firestore:", error.message);
             throw error;
         }
     };
 
-    const handleLike = async (url) => {
+    const handleLike = async (url, likedByCurrentUser) => {
         try {
-            const updatedLikes = { ...likes };
-            if (updatedLikes[url].liked) {
-                updatedLikes[url].likes--;
-            } else {
-                updatedLikes[url].likes++;
-            }
-            updatedLikes[url].liked = !updatedLikes[url].liked;
-            setLikes(updatedLikes);
-
-            // Update Firestore document with updated likes data
-            await updateLikesInFirestore(url, updatedLikes[url]);
+            const userId = auth.currentUser.uid; // Get the ID of the currently authenticated user
+            const liked = !likedByCurrentUser; // Toggle like for the current user
+            const docId = encodeURIComponent(url);
+            const likesRef = doc(db, 'likes', docId);
+            const docSnapshot = await getDoc(likesRef);
+            const likesData = docSnapshot.exists() ? docSnapshot.data() : { likes: {}, likesCount: 0 };
+            const currentLikes = likesData.likes || {};
+            currentLikes[userId] = liked;
+            const likesCount = Object.values(currentLikes).filter(like => like).length;
+            await setDoc(likesRef, {
+                likes: currentLikes,
+                likesCount
+            });
+            setImages(prevImages => {
+                return prevImages.map(image => {
+                    if (image.url === url) {
+                        return { ...image, likesCount, likedByCurrentUser: liked };
+                    }
+                    return image;
+                });
+            });
         } catch (error) {
             console.error("Error updating like:", error.message);
         }
     };
 
- 
     return (
         <View style={styles.container}>
             <ScrollView>
                 {images.map((image, index) => (
                     <View key={index}>
                         <Image source={{ uri: image.url }} style={styles.image} />
-                        <Button title={likes[image.url]?.liked ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url)} />
-                        {likes[image.url] && (
-                            <Text>Likes: {likes[image.url].likes}</Text>
-                        )}
+                        <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
+                        <Text>Likes: {image.likesCount}</Text>
                     </View>
                 ))}
             </ScrollView>
