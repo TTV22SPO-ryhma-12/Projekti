@@ -31,32 +31,6 @@ export default function Home() {
         fetchImagesFromFirebase();
     }, []);
 
-    const updateLikesInFirestore = async (url, userId, liked) => {
-        try {
-            const docId = encodeURIComponent(url);
-            const likesRef = doc(db, 'likes', docId);
-            const docSnapshot = await getDoc(likesRef);
-    
-            // Get current likes data
-            const currentLikes = docSnapshot.exists() ? docSnapshot.data().likes || {} : {};
-    
-            // Update user's like status
-            currentLikes[userId] = liked;
-    
-            // Calculate likes count
-            const likesCount = Object.values(currentLikes).filter(like => like).length;
-    
-            // Update Firestore document with updated likes data
-            await setDoc(likesRef, {
-                likes: currentLikes,
-                likesCount
-            });
-        } catch (error) {
-            console.error("Error updating likes in Firestore:", error.message);
-            throw error;
-        }
-    };
-
     const handleLike = async (url, likedByCurrentUser) => {
         try {
             const userId = auth.currentUser.uid; // Get the ID of the currently authenticated user
