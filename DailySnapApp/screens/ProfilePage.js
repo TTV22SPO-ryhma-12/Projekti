@@ -3,7 +3,6 @@ import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dim
 import { getAuth } from 'firebase/auth';
 import { fetchImages, deleteImage } from '../Firebase/FirebaseAuth';
 import Constants from 'expo-constants';
-import { firestore, collection, addDoc, doc, setDoc, getDoc, ref, USERS } from '../Firebase/FirebaseConfig';
 
 const auth = getAuth();
 
@@ -11,20 +10,16 @@ function ProfilePage({ navigation }) {
     const [imageUrls, setImageUrls] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState('');
-    const [username, setUsername] = useState('');
-    const [loading, setLoading] = useState(true);
-
 
     useEffect(() => {
         const fetchAndSetImages = async () => {
-            const userId = auth.currentUser.uid
-            console.log('User ID:', userId);
-            if (userId) {
-                const fetchedImages = await fetchImages(`${userId}`);
-            console.log('Fetched User Images:', fetchedImages); 
-            setImageUrls(fetchedImages)
-        }
-    };
+            try {
+                const images = await fetchImages(`images/${auth.currentUser.uid}`);
+                setImageUrls(images);
+            } catch (error) {
+                console.error("Error fetching images:", error.message);
+            }
+        };
         fetchAndSetImages();
     }, []);
 
@@ -36,35 +31,6 @@ function ProfilePage({ navigation }) {
             console.error("Error signing out:", error.message);
         }
     };
-
-    const getUsername = async () => {
-        const userDoc = doc(firestore, USERS, auth.currentUser.uid);
-        const docSnap = await getDoc(userDoc);
-
-        if (docSnap.exists()) {
-            return docSnap.data().username;
-        } else {
-            throw new Error("User document not found");
-        }
-    };
-
-    useEffect(() => {
-        const fetchUsername = async () => {
-            try {
-                const user = auth.currentUser;
-                if (user) {
-                    const fetchedUsername = await getUsername(user.uid);
-                    setUsername(fetchedUsername);
-                } else {
-                    setUsername("NO USER");
-                }
-            } catch (error) {
-                console.error("Error fetching username:", error.message);
-            }
-            setLoading(false);
-        };
-        fetchUsername();
-    }, []);
 
     const showModal = () => {
         Alert.alert(
@@ -91,10 +57,8 @@ function ProfilePage({ navigation }) {
     };
 
     const openImage = (url) => {
-        if(url) {
         setSelectedImage(url);
         setModalVisible(true);
-        }
     };
 
     const handleDeleteImage = () => {
@@ -113,7 +77,7 @@ function ProfilePage({ navigation }) {
                         try {
                             await deleteImage(selectedImage);
     
-                            setImageUrls(prevUrls => prevUrls.filter(url => url !== selectedImage));
+                            setImageUrls(prevImages => prevImages.filter(image => image.url !== selectedImage));
 
                             setModalVisible(false);
     
@@ -133,7 +97,7 @@ function ProfilePage({ navigation }) {
     return (
         <View style={styles.container}>
             <View style={styles.userInfoContainer}>
-                <Text style={styles.usernameText}>{username}</Text>
+                <Text style={styles.usernameText}>Username</Text>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={handleSettings}>
                         <Text style={styles.buttonText}>Settings</Text>
@@ -145,9 +109,9 @@ function ProfilePage({ navigation }) {
             </View>
 
             <ScrollView contentContainerStyle={styles.imageGrid}>
-                {imageUrls.map((item, index) => (
-                    <TouchableOpacity key={index} onPress={() => openImage(item.url)}>
-                            <Image source={{ uri: item.url }} style={styles.imageThumbnail} />
+                {imageUrls.map((image, index) => (
+                    <TouchableOpacity key={index} onPress={() => openImage(image.url)}>
+                        <Image source={{ uri: image.url }} style={styles.imageThumbnail} />
                     </TouchableOpacity>
                 ))}
             </ScrollView>
@@ -162,12 +126,7 @@ function ProfilePage({ navigation }) {
                     <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
                         <Text style={styles.closeButtonText}>Close</Text>
                     </TouchableOpacity>
-                    {selectedImage ?(
-                        <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
-                    ):(
-                        <Text>No image selected</Text>
-                    
-                    )}
+                    <Image source={{ uri: selectedImage }} style={styles.modalImage} resizeMode="contain" />
                     <TouchableOpacity onPress={handleDeleteImage} style={styles.deleteButton}>
                         <Text style={styles.deleteButtonText}>Delete</Text>
                     </TouchableOpacity>
@@ -188,7 +147,7 @@ const styles = StyleSheet.create({
         borderBottomColor: '#ddd',
     },
     usernameText: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
     },
@@ -231,19 +190,19 @@ const styles = StyleSheet.create({
     closeButton: {
         position: 'absolute',
         top: 30,
-        right: 20, 
-        zIndex: 999, 
-    }, 
-    closeButtonText: { 
-        paddingTop: Constants.statusBarHeight, 
-        color: '#fff', 
-        fontSize: 16, 
-    }, 
-    deleteButton: { 
-        position: 'absolute', 
-        bottom: 30, 
-        backgroundColor: '#ff0000', 
-        paddingVertical: 10, 
+        right: 20,
+        zIndex: 999,
+    },
+    closeButtonText: {
+        paddingTop: Constants.statusBarHeight,
+        color: '#fff',
+        fontSize: 16,
+    },
+    deleteButton: {
+        position: 'absolute',
+        bottom: 30,
+        backgroundColor: '#ff0000',
+        paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
     },

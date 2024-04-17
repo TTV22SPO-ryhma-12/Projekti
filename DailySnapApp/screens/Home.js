@@ -1,130 +1,88 @@
-import { StyleSheet, View, Text, TextInput, Button, StatusBar, ScrollView, Image, TouchableOpacity, RefreshControl} from 'react-native';
-import { CameraComponent } from '../Components/camera';
-import { fetchImages } from '../Firebase/FirebaseAuth';
 import React, { useEffect, useState } from 'react';
-import { auth, fetchUsername, } from '../Firebase/FirebaseAuth';
-import { getDoc, doc, firestore, USERS } from '../Firebase/FirebaseConfig';
+import { StyleSheet, View, Text, ScrollView, Image, Button } from 'react-native';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import { fetchImages } from '../Firebase/FirebaseAuth';
+import { getAuth } from 'firebase/auth';
 
-
+const auth = getAuth();
+const db = getFirestore();
 
 export default function Home() {
     const [images, setImages] = useState([]);
-    const [selectedImage, setSelectedImage] = useState('');
-    const [modalVisible, setModalVisible] = useState(false);
-    const [username, setUsername] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-
-    const openImage = (url) => {
-        setSelectedImage(url);
-        setModalVisible(true);
-    };
-
-    const onRefresh = React.useCallback(() => {
-        setRefreshing(true);
-        setTimeout(() => {
-          setRefreshing(false);
-          console.log("Refreshing page.")
-        }, 2000);
-      }, []);
 
     useEffect(() => {
         const fetchImagesFromFirebase = async () => {
-                const fetchedImages = await fetchImages();
-                console.log('fetched Images', fetchedImages);
-                setImages(fetchedImages);
+            try {
+                const fetchedImages = await fetchImages('allimages');
+                const imagesWithLikes = await Promise.all(fetchedImages.map(async (image) => {
+                    const docId = encodeURIComponent(image.url);
+                    const likesRef = doc(db, 'likes', docId);
+                    const docSnapshot = await getDoc(likesRef);
+                    const likesData = docSnapshot.exists() ? docSnapshot.data() : { likes: {}, likesCount: 0 };
+                    const likedByCurrentUser = likesData.likes && likesData.likes[auth.currentUser.uid] ? true : false;
+                    return { ...image, likesCount: likesData.likesCount, likedByCurrentUser };
+                }));
+                setImages(imagesWithLikes);
+            } catch (error) {
+                console.error("Error fetching images:", error.message);
+            }
         };
+
         fetchImagesFromFirebase();
     }, []);
 
-    useEffect(() => {
-        const checkUser = async () => {
-            const user = auth.currentUser;
-            if (user) {
-                const username = await fetchUsername(user.uid);
-                console.log('username', username);
-        }
-        }
-        checkUser();
-    } , []);
-
-    useEffect(() => {
-        const fetchUsername = async () => {
-            try {
-                const user = auth.currentUser;
-                if (user) {
-                    const fetchedUsername = await getUsername(user.uid);
-                    setUsername(fetchedUsername);
-                } else {
-                    setUsername("NO USER");
-                }
-            } catch (error) {
-                console.error("Error fetching username:", error.message);
-            }
-            setLoading(false);
-        };
-        fetchUsername();
-    }, []);
-
-    const getUsername = async () => {
-        const userDoc = doc(firestore, USERS, auth.currentUser.uid);
-        const docSnap = await getDoc(userDoc);
-
-        if (docSnap.exists()) {
-            return docSnap.data().username;
-        } else {
-            throw new Error("User document not found");
+    const handleLike = async (url, likedByCurrentUser) => {
+        try {
+            const userId = auth.currentUser.uid; // Get the ID of the currently authenticated user
+            const liked = !likedByCurrentUser; // Toggle like for the current user
+            const docId = encodeURIComponent(url);
+            const likesRef = doc(db, 'likes', docId);
+            const docSnapshot = await getDoc(likesRef);
+            const likesData = docSnapshot.exists() ? docSnapshot.data() : { likes: {}, likesCount: 0 };
+            const currentLikes = likesData.likes || {};
+            currentLikes[userId] = liked;
+            const likesCount = Object.values(currentLikes).filter(like => like).length;
+            await setDoc(likesRef, {
+                likes: currentLikes,
+                likesCount
+            });
+            setImages(prevImages => {
+                return prevImages.map(image => {
+                    if (image.url === url) {
+                        return { ...image, likesCount, likedByCurrentUser: liked };
+                    }
+                    return image;
+                });
+            });
+        } catch (error) {
+            console.error("Error updating like:", error.message);
         }
     };
 
     return (
-        <View style={styles.home}>
-            <Text>Tervetuloa kotisivulle</Text>
-            <ScrollView style={styles.scroll}
-            refreshControl={
-                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-              }>
-            {images.map((image, index) => (
-                <View key={index} style={styles.imageContainer}>
-                    <Image source={{ uri: image.url }} style={styles.image} />
-                    <Text style={styles.username}>{username}{image.username}</Text>
-                    <Text style={styles.caption}>{image.caption}</Text>
-                </View>
-            ))}
+        <View style={styles.container}>
+            <ScrollView>
+                {images.map((image, index) => (
+                    <View key={index}>
+                        <Image source={{ uri: image.url }} style={styles.image} />
+                        <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
+                        <Text>Likes: {image.likesCount}</Text>
+                    </View>
+                ))}
             </ScrollView>
         </View>
-        
-    )
+    );
 }
 
-
 const styles = StyleSheet.create({
-    home: {
+    container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f5f5f5',
-    },
-    scroll: {
-        width: "100%",
-        
     },
     image: {
-        width: "100%",
-        height: 400,
-        marginVertical: 5,
+        width: 300,
+        height: 300,
+        marginBottom: 10,
     },
-    imageContainer: {
-        marginVertical: 10,
-        padding: 10,
-        backgroundColor: 'white',
-    },
-    caption: {
-        fontSize: 16,
-        color: 'gray',
-    },
-    username: {
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-})
+});
