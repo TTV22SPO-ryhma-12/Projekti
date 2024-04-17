@@ -37,7 +37,6 @@ function CameraComponent() {
       <StatusBar style="auto" />
         <TouchableOpacity onPress={takePicture}>
           <Image source={require('../assets/camera.png')} style={styles.cameraIcon} />
-          <Text>Take Picture</Text>
         </TouchableOpacity>
     </View>
   );

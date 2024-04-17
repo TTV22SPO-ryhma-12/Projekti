@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Image, StyleSheet, ActivityIndicator } from 'react-native';
-import { uploadToFirebase, auth } from '../Firebase/FirebaseAuth';
+import { uploadToFirebase} from '../Firebase/FirebaseAuth';
 import { useNavigation } from '@react-navigation/native';
+import { auth } from '../Firebase/FirebaseConfig';
 
 
 export default function Editor({ route }) {
@@ -14,7 +15,7 @@ export default function Editor({ route }) {
   const uploadImage = async () => {
     console.log("Upload started...");
     setIsLoading(true);
-    const userId = auth.currentUser ? auth.currentUser.uid : 'unknown';
+    const userId = auth.currentUser ? auth.currentUser.uid : null;
     if (!userId) {
       console.error("User not logged in");
       setIsLoading(false);

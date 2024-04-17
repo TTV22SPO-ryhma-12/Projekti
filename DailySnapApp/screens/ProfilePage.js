@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
 import { getAuth } from 'firebase/auth';
-import { fetchImages, deleteImage, getUsername } from '../Firebase/FirebaseAuth';
+import { fetchImages, deleteImage, fetchUsername, getUsername } from '../Firebase/FirebaseAuth';
 import Constants from 'expo-constants';
-import { firestore, collection, addDoc, doc, setDoc, getDoc, ref, USERS, getDocs } from '../Firebase/FirebaseConfig';
 
 const auth = getAuth();
 
@@ -12,20 +11,33 @@ function ProfilePage({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState('');
     const [username, setUsername] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [caption, setCaption] = useState('');
 
     useEffect(() => {
-        const fetchAndSetImages = async () => {
-            try {
+        const fetchImagesFromFirebase = async () => {
+          try {
                 const images = await fetchImages(`images/${auth.currentUser.uid}`);
                 setImageUrls(images);
             } catch (error) {
                 console.error("Error fetching images:", error.message);
             }
         };
-        fetchAndSetImages();
+        fetchImagesFromFirebase();
     }, []);
+
+
+
+    useEffect(() => {
+        const getusername = async () => {
+            const user = auth.currentUser.uid;
+            if (user) {
+                const username = await getUsername(user);
+                console.log('username', username);
+                setUsername(username);
+        }
+        }
+        getusername();
+    } , []);
+
 
     const handleSignOut = async () => {
         try {
@@ -64,8 +76,7 @@ function ProfilePage({ navigation }) {
         setSelectedImage(url);
         setModalVisible(true);
     };
- 
-    
+
     const handleDeleteImage = () => {
         Alert.alert(
             "Delete Image",
@@ -102,7 +113,7 @@ function ProfilePage({ navigation }) {
     return (
         <View style={styles.container}>
             <View style={styles.userInfoContainer}>
-                <Text style={styles.usernameText}>Username</Text>
+                <Text style={styles.usernameText}>{username}</Text>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={handleSettings}>
                         <Text style={styles.buttonText}>Settings</Text>
