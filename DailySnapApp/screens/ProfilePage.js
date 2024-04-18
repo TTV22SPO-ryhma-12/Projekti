@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
-import { getAuth } from 'firebase/auth';
-import { fetchImages, deleteImage, fetchUsername, getUsername } from '../Firebase/FirebaseAuth';
+import { fetchImages, deleteImage, getUsername } from '../Firebase/FirebaseAuth';
 import Constants from 'expo-constants';
+import { auth } from '../Firebase/FirebaseConfig';
 
-const auth = getAuth();
+
 
 function ProfilePage({ navigation }) {
     const [imageUrls, setImageUrls] = useState([]);

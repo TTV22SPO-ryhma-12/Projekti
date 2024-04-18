@@ -3,9 +3,8 @@ import { fetchUsername, fetchImageData } from '../Firebase/FirebaseAuth';
 import { StyleSheet, View, Text, ScrollView, Image, Button, TouchableOpacity, RefreshControl } from 'react-native';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { fetchImages } from '../Firebase/FirebaseAuth';
-import { getAuth } from 'firebase/auth';
+import { auth } from '../Firebase/FirebaseConfig';
 
-const auth = getAuth();
 const db = getFirestore();
 
 export default function Home() {
@@ -18,7 +17,7 @@ export default function Home() {
 
     const fetchImagesFromFirebase = async () => {
         try {
-            const user = auth.currentUser.uid; // Define 'user' here
+            const user = auth.currentUser.uid;
             const fetchedImages = await fetchImages('allimages');
             const imagesWithLikes = await Promise.all(fetchedImages.map(async (image) => {
                 const docId = encodeURIComponent(image.url);
