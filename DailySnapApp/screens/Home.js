@@ -104,17 +104,17 @@ export default function Home() {
                 style={styles.scroll}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
             >
-                {images.map((image, index) => (
+                {images.slice().sort((a, b) => b.createdAt - a.createdAt).map((image, index) => (
                     <TouchableOpacity key={index} activeOpacity={1} style={styles.imageContainer} onPress={() => handleDoublePress(image.url, image.likedByCurrentUser)}>
                         <Text style={styles.username}>{image.username}</Text>
-
+    
                         <View style={styles.uploadTimeContainer}>
                             <Text style={styles.uploadTime}>{formatDate(image.createdAt)}</Text>
                         </View>
-
+    
                         <Image source={{ uri: image.url}} style={styles.image} />
                         <Text style={styles.caption}>{image.caption}</Text>
-
+    
                         <View style={styles.likesContainer}>
                             <Text style={styles.likes}>{image.likesCount} {image.likedByCurrentUser ? '❤️' : '🤍'}</Text>
                         </View>
@@ -123,7 +123,7 @@ export default function Home() {
             </ScrollView>
         </View>
     );
-}
+}    
 
 const styles = StyleSheet.create({
     home: {
