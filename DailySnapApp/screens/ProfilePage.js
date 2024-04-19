@@ -114,6 +114,25 @@ function ProfilePage({ navigation }) {
         );
     };
 
+    const showModalpicture = () => {
+        Alert.alert(
+            "Change Profile Picture",
+            "Do you want to change your profile picture?",
+            [
+                {
+                    text: "Cancel",
+                    onPress: () => console.log("Profile picture change canceled"),
+                    style: "cancel"
+                },
+                {
+                    text: "Change Picture",
+                    onPress: pickImage,
+                    style: "default"
+                }
+            ]
+        );
+    };
+
     const handleSettings = () => {
         navigation.navigate('Settings');
         console.log("settings screen opened")
@@ -162,12 +181,9 @@ function ProfilePage({ navigation }) {
         <View style={[styles.container, isDarkMode ? styles.dark : styles.light]}>
             <View style={[styles.userInfoContainer, isDarkMode ? styles.dark : styles.light]}>
                 <Text style={[styles.usernameText, isDarkMode ? styles.dark : styles.light]}>{username}</Text>
-                <View style={styles.profileImageContainer}>
-                  <Image source={{ uri: profileImage || "no image"}} style={styles.profileImage} />
-                    <TouchableOpacity style={styles.button} onPress={pickImage}>
-                        <Text style={styles.changeProfileImageText}>Change Profile Image</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity onPress={showModalpicture} style={styles.profileImageContainer}>
+                  <Image source={{ uri: profileImage || "no image" }} style={styles.profileImage} />
+                </TouchableOpacity>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={handleSettings}>
                         <Text style={styles.buttonText}>Settings</Text>
@@ -287,9 +303,10 @@ const styles = StyleSheet.create({
     profileImage: {
         width: 200,
         height: 200,
-        borderRadius: 80,
+        borderRadius: 100,
         marginBottom: 20,
         borderWidth: 3,
+        alignContent: 'right',
     },
     changeProfileImageText: {
         color: 'white',
