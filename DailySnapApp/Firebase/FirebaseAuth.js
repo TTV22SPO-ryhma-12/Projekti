@@ -246,7 +246,8 @@ const fetchImageData = async () => {
         return {
             url: data.imageUrl,
             username: username,
-            caption: data.caption
+            caption: data.caption,
+            createdAt: data.createdAt,
         };
     }));
     return imageData;
