@@ -116,7 +116,7 @@ export default function Home() {
                         </View>
     
                         <Image source={{ uri: image.url}} style={styles.image} />
-                        <Text style={[styles.caption, isDarkMode ? styles.dark : styles.light]}>{image.caption}</Text>
+                        <Text style={[styles.caption, isDarkMode ? styles.dark : styles.light]}>{image.username}: {image.caption}</Text>
     
                         <View style={styles.likesContainer}>
                             <Text style={styles.likes}>{image.likesCount} {image.likedByCurrentUser ? '❤️' : '🤍'}</Text>
@@ -166,7 +166,6 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 1,
         right: 1,
-        backgroundColor: 'rgba(255, 255, 255, 0.7)',
         borderRadius: 5,
         paddingHorizontal: 5,
     },
