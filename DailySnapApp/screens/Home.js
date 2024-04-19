@@ -119,7 +119,7 @@ export default function Home() {
                         <Text style={[styles.caption, isDarkMode ? styles.dark : styles.light]}>{image.username}: {image.caption}</Text>
     
                         <View style={styles.likesContainer}>
-                            <Text style={styles.likes}>{image.likesCount} {image.likedByCurrentUser ? '❤️' : '🤍'}</Text>
+                            <Text style={[styles.likes, isDarkMode ? styles.dark : styles.light]}>{image.likesCount} {image.likedByCurrentUser ? '❤️' : '🤍'}</Text>
                         </View>
                     </TouchableOpacity>
                 ))}
