@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { fetchUsername, fetchImageData } from '../Firebase/FirebaseAuth';
-import { StyleSheet, View, Text, ScrollView, Image, Button, RefreshControl } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Image, TouchableOpacity, RefreshControl } from 'react-native';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
-import { fetchImages } from '../Firebase/FirebaseAuth';
+import { fetchImages, fetchImageData } from '../Firebase/FirebaseAuth';
 import { auth, firestore } from '../Firebase/FirebaseConfig';
 import { useTheme } from '../Components/ThemeContext';
 
@@ -11,6 +10,7 @@ export default function Home() {
 
     const [images, setImages] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+    const [lastClickTime, setLastClickTime] = useState(0);
 
     useEffect(() => {
         fetchImageDataFromFirebase();
@@ -36,7 +36,7 @@ export default function Home() {
             // Merge image data with likes data
             const mergedImages = imageData.map(image => {
                 const foundImage = imagesWithLikes.find(img => img.url === image.url);
-                return foundImage ? { ...foundImage, caption: image.caption, username: image.username } : image;
+                return foundImage ? { ...foundImage, caption: image.caption, username: image.username, createdAt: image.createdAt } : image;
             });
     
             // Update state with merged data
@@ -82,6 +82,24 @@ export default function Home() {
         }
     };
 
+    const handleDoublePress = (url, likedByCurrentUser) => {
+        const currentTime = Date.now();
+        const timeDiff = currentTime - lastClickTime;
+        if (timeDiff < 300) {
+            handleLike(url, likedByCurrentUser);
+        }
+        setLastClickTime(currentTime);
+    };
+
+    const formatDate = (date) => {
+        const d = date.toDate();
+        const day = d.getDate().toString().padStart(2, '0');
+        const month = (d.getMonth() + 1).toString().padStart(2, '0');
+        const year = d.getFullYear();
+        const hours = d.getHours().toString().padStart(2, '0');
+        const minutes = d.getMinutes().toString().padStart(2, '0');
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
+    };
 
     return (
         <View style={[styles.home, isDarkMode ? styles.dark : styles.light]}>
@@ -98,17 +116,30 @@ export default function Home() {
                         <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
                         <Text style={[styles.likes, isDarkMode ? styles.dark : styles.light]}>Likes: {image.likesCount}</Text>
                     </View>
+                {images.slice().sort((a, b) => b.createdAt - a.createdAt).map((image, index) => (
+                    <TouchableOpacity key={index} activeOpacity={1} style={styles.imageContainer} onPress={() => handleDoublePress(image.url, image.likedByCurrentUser)}>
+                        <Text style={styles.username}>{image.username}</Text>
+    
+                        <View style={styles.uploadTimeContainer}>
+                            <Text style={styles.uploadTime}>{formatDate(image.createdAt)}</Text>
+                        </View>
+    
+                        <Image source={{ uri: image.url}} style={styles.image} />
+                        <Text style={styles.caption}>{image.caption}</Text>
+    
+                        <View style={styles.likesContainer}>
+                            <Text style={styles.likes}>{image.likesCount} {image.likedByCurrentUser ? '❤️' : '🤍'}</Text>
+                        </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
         </View>
     );
-}
+}    
 
 const styles = StyleSheet.create({
     home: {
         flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
         paddingTop: 50,
     },
     heading: {
@@ -117,24 +148,48 @@ const styles = StyleSheet.create({
     },
     scroll: {
         flex: 1,
-        width: '100%',
     },
     imageContainer: {
         marginBottom: 20,
-        alignItems: 'center',
+        position: 'relative', // Needed for absolute positioning of likes
     },
     image: {
-        width: 300,
-        height: 300,
-        marginBottom: 10,
+        width: '100%',
+        aspectRatio: 1, // Maintain aspect ratio
     },
     username: {
+        paddingHorizontal: 2,
         fontWeight: 'bold',
         fontSize: 20,
+        marginBottom: 2,
     },
     caption: {
-        fontStyle: 'italic',
-        fontSize: 16,
+        paddingHorizontal: 2,
+        fontSize: 15,
+        marginBottom: 5,
+        color: 'gray',
+    },
+    likesContainer: {
+        position: 'absolute',
+        bottom: 1,
+        right: 1,
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
+        borderRadius: 5,
+        paddingHorizontal: 5,
+    },
+    likes: {
+        fontSize: 15,
+    },
+    uploadTimeContainer: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+    },
+    uploadTime: {
+        paddingHorizontal: 2,
+        fontSize: 15,
+        marginTop: 5,
+        color: 'gray',
     },
     dark: {
         backgroundColor: '#333',
