@@ -1,12 +1,10 @@
-import { StyleSheet, View, Text, TextInput, Button, StatusBar, Alert } from 'react-native';
-import React from 'react';
-import { deleteCurrentUser, deleteUserStorageData } from '../Firebase/FirebaseAuth';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TextInput, Button, Alert } from 'react-native';
+import { deleteUserStorageData, deleteCurrentUser } from '../Firebase/FirebaseAuth';
 import { firestore, USERS, doc, setDoc, auth } from '../Firebase/FirebaseConfig';
-import { useState } from 'react';
-
-
 
 export default function Settings({ navigation }) {
+    const [showForm, setShowForm] = useState(false);
     const [newUsername, setNewUsername] = useState('');
     const [message, setMessage] = useState('');
 
@@ -36,7 +34,6 @@ export default function Settings({ navigation }) {
                 },
             ]
         );
-
     };
 
     const handleUpdateUsername = async () => {
@@ -44,77 +41,68 @@ export default function Settings({ navigation }) {
             Alert.alert("Username cannot be empty");
             return;
         }
-        Alert.alert(
-            "Confirm",
-            "Are you sure you want to change your username?",
-            [
-                {
-                    text: "Cancel",
-                    onPress: () => console.log("Username change cancelled"),
-                    style: "cancel"
-                },
-                {
-                    text: "Confirm",
-                    onPress: async () => {
-                        try {
-                            const userDocRef = doc(firestore, USERS, auth.currentUser.uid);
-                            console.log(auth.currentUser.uid)
-                            await setDoc(userDocRef, { username: newUsername }, { merge: true });
-                            setMessage("Username updated successfully");
-                            Alert.alert("Username updated successfully");
-                            navigation.goBack();
-                        } catch (error) {
-                            console.error("Error updating username:", error.message);
-                            Alert.alert("Error updating username:", error.message);
-                        }
-                    }
+        try {
+            const userDocRef = doc(firestore, USERS, auth.currentUser.uid);
+            await setDoc(userDocRef, { username: newUsername }, { merge: true });
+            setMessage("Username updated successfully");
+            Alert.alert("Username updated successfully");
+            navigation.goBack();
+        } catch (error) {
+            console.error("Error updating username:", error.message);
+            Alert.alert("Error updating username:", error.message);
+        }
+    }
 
-                }
-            ]
-        );
+    const handleCancelUpdate = () => {
+        setShowForm(false);
+        setNewUsername('');
     }
 
     return (
-        <View style={styles.home}>
-            <Text style={styles.text}>Tervetuloa asetuksiin</Text>
-            <TextInput
-                style={styles.input}
-                placeholder="New Username"
-                onChangeText={setNewUsername}
-                value={newUsername}
-            />
-            <Button style={styles.Ubutton} title="Change username" onPress={handleUpdateUsername} />
-            <Button style={styles.Dbutton} title="Delete Account" onPress={handleDeleteAccount} />
+        <View style={styles.container}>
+            <Text style={styles.title}>Settings</Text>
+            {showForm ? (
+                <View>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="New Username"
+                        onChangeText={setNewUsername}
+                        value={newUsername}
+                    />
+                    <View style={styles.buttonGroup}>
+                        <Button title="Change Username" onPress={handleUpdateUsername} />
+                        <Button title="Cancel" onPress={handleCancelUpdate} color="red" />
+                    </View>
+                </View>
+            ) : (
+                <Button title="Change Username" onPress={() => setShowForm(true)} />
+            )}
+            {!showForm && <Button title="Delete Account" onPress={handleDeleteAccount} />}
         </View>
-    )
+    );
 }
 
-
 const styles = StyleSheet.create({
-    home: {
+    container: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'white',
     },
-    text: {
+    title: {
         fontSize: 20,
-        color: 'black',
+        marginBottom: 20,
     },
     input: {
         width: 200,
         height: 40,
-        margin: 12,
+        marginVertical: 10,
         borderWidth: 1,
         padding: 10,
-        backgroundColor: 'white',
     },
-    Ubutton: {
-        backgroundColor: 'blue',
-        color: 'white',
+    buttonGroup: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 10,
     },
-    Dbutton: {
-        backgroundColor: 'black',
-        color: 'black',
-    },
-})
+});
