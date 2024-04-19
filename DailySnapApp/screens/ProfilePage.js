@@ -4,10 +4,13 @@ import { fetchImages, deleteImage, fetchUsername, getUsername, uploadProfilePict
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import { auth } from '../Firebase/FirebaseConfig';
+import { useTheme } from '../Components/ThemeContext';
 
 
 
 function ProfilePage({ navigation }) {
+    const { isDarkMode, toggleTheme } = useTheme();
+
     const [imageUrls, setImageUrls] = useState([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState('');
@@ -156,12 +159,12 @@ function ProfilePage({ navigation }) {
     
 
     return (
-        <View style={styles.container}>
-            <View style={styles.userInfoContainer}>
-                <Text style={styles.usernameText}>{username}</Text>
+        <View style={[styles.container, isDarkMode ? styles.dark : styles.light]}>
+            <View style={[styles.userInfoContainer, isDarkMode ? styles.dark : styles.light]}>
+                <Text style={[styles.usernameText, isDarkMode ? styles.dark : styles.light]}>{username}</Text>
                 <View style={styles.profileImageContainer}>
                   <Image source={{ uri: profileImage || "no image"}} style={styles.profileImage} />
-                    <TouchableOpacity onPress={pickImage}>
+                    <TouchableOpacity style={styles.button} onPress={pickImage}>
                         <Text style={styles.changeProfileImageText}>Change Profile Image</Text>
                     </TouchableOpacity>
                 </View>
@@ -282,11 +285,24 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     profileImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
+        width: 200,
+        height: 200,
+        borderRadius: 80,
         marginBottom: 20,
         borderWidth: 3,
+    },
+    changeProfileImageText: {
+        color: 'white',
+        fontSize: 18,
+        textAlign: 'center',
+    },
+    dark: {
+        backgroundColor: '#333',
+        color: '#fff',
+    },
+    light: {
+        backgroundColor: '#fff',
+        color: '#333',
     },
 });
 

@@ -11,6 +11,7 @@ import ProfilePage from './screens/ProfilePage';
 import  RegistrationForm  from './screens/Registeration'; 
 import Settings from './screens/Settings';
 import { Editor } from './screens/Editor';
+import { ThemeProvider, useTheme } from './Components/ThemeContext';
 
 // Create a stack navigator
 const Stack = createStackNavigator();
@@ -35,9 +36,11 @@ export default function App() {
     await auth.signOut();
     // `isSignedIn` will automatically be set to false by the auth listener
   };
+  
 
   return (
-    <NavigationContainer>
+    <ThemeProvider>
+    <NavigationContainer theme={styles.DarkTheme}>
       <View style={styles.container}>
         <StatusBar backgroundColor="#000" barStyle="light-content" />
         <Stack.Navigator>
@@ -50,14 +53,15 @@ export default function App() {
             </>
           ) : (
             <>
-              <Stack.Screen name="Login" component={LoginForm} />
-              <Stack.Screen name="Register" component={RegistrationForm} /> 
+              <Stack.Screen style={styles.Juu} name="Login" component={LoginForm} />
+              <Stack.Screen style={styles.Juu} name="Register" component={RegistrationForm} /> 
             </>
           )}
         </Stack.Navigator>
         <NavBar isSignedIn={isSignedIn} onToggleSignIn={handleSignIn} onSignOut={handleSignOut} />
       </View>
     </NavigationContainer>
+    </ThemeProvider>
   );
 }
 
@@ -65,5 +69,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  DarkTheme: {
+    dark: true,
+    colors: {
+      primary: 'white',
+      background: 'white',
+      card: 'black',
+      text: 'white',
+      border: 'black',
+      notification: 'red',
+    },
+  },
+  Juu: {
+    dark: true,
+    colors: {
+      primary: 'white',
+      background: 'white',
+      card: 'black',
+      text: 'white',
+      border: 'black',
+      notification: 'red',
+    },
   },
 });

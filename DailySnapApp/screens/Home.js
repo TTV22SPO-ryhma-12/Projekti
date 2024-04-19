@@ -4,8 +4,11 @@ import { StyleSheet, View, Text, ScrollView, Image, Button, RefreshControl } fro
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { fetchImages } from '../Firebase/FirebaseAuth';
 import { auth, firestore } from '../Firebase/FirebaseConfig';
+import { useTheme } from '../Components/ThemeContext';
 
 export default function Home() {
+    const { isDarkMode } = useTheme();
+
     const [images, setImages] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
 
@@ -81,19 +84,19 @@ export default function Home() {
 
 
     return (
-        <View style={styles.home}>
-            <Text>Tervetuloa kotisivulle</Text>
+        <View style={[styles.home, isDarkMode ? styles.dark : styles.light]}>
+            <Text style={[styles.heading, isDarkMode ? styles.dark : styles.light]}>Tervetuloa kotisivulle</Text>
             <ScrollView
                 style={styles.scroll}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
             >
                 {images.map((image, index) => (
                     <View key={index} style={styles.imageContainer}>
-                        <Text style={styles.username}>{image.username}</Text>
+                        <Text style={[styles.username, isDarkMode ? styles.dark : styles.light]}>{image.username}</Text>
                         <Image source={{ uri: image.url}} style={styles.image} />
-                        <Text style={styles.caption}>{image.caption}</Text>
+                        <Text style={[styles.caption, isDarkMode ? styles.dark : styles.light]}>{image.caption}</Text>
                         <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
-                        <Text>Likes: {image.likesCount}</Text>
+                        <Text style={[styles.likes, isDarkMode ? styles.dark : styles.light]}>Likes: {image.likesCount}</Text>
                     </View>
                 ))}
             </ScrollView>
@@ -107,6 +110,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         paddingTop: 50,
+    },
+    heading: {
+        fontSize: 24,
+        fontWeight: 'bold',
     },
     scroll: {
         flex: 1,
@@ -128,5 +135,16 @@ const styles = StyleSheet.create({
     caption: {
         fontStyle: 'italic',
         fontSize: 16,
+    },
+    dark: {
+        backgroundColor: '#333',
+        color: '#fff',
+    },
+    light: {
+        backgroundColor: '#fff',
+        color: '#333',
+    },
+    likes: {
+        fontSize: 18,
     },
 });

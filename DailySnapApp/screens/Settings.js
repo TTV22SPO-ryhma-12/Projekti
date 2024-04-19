@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, TextInput, Button, Alert } from 'react-native';
+import { StyleSheet, View, Text, TextInput, Button, Alert, Switch } from 'react-native';
 import { deleteUserStorageData, deleteCurrentUser } from '../Firebase/FirebaseAuth';
 import { firestore, USERS, doc, setDoc, auth } from '../Firebase/FirebaseConfig';
+import { useTheme } from '../Components/ThemeContext';
 
 export default function Settings({ navigation }) {
+    const { isDarkMode, toggleTheme } = useTheme();
+
     const [showForm, setShowForm] = useState(false);
     const [newUsername, setNewUsername] = useState('');
     const [message, setMessage] = useState('');
@@ -59,12 +62,21 @@ export default function Settings({ navigation }) {
     }
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Settings</Text>
+        <View style={[styles.container, isDarkMode ? styles.dark : styles.light]}>
+            <Text style={[styles.title, isDarkMode ? styles.dark : styles.light]}>Settings</Text>
+            <View style={styles.switch}>
+                <Text style={[styles.darkmodetext, isDarkMode ? styles.dark : styles.light]}>Dark Mode</Text>
+                <Switch
+                    trackColor={{ false: "black", true: "white" }}
+                    thumbColor={isDarkMode ? "black" : "white"}
+                    ios_backgroundColor="#3e3e3e"
+                    value={isDarkMode}
+                    onValueChange={toggleTheme} />
+            </View>
             {showForm ? (
-                <View>
+                <View style={[styles.newUsername, isDarkMode ? styles.dark : styles.light]}>
                     <TextInput
-                        style={styles.input}
+                        style={[styles.input, isDarkMode ? styles.dark : styles.light]}
                         placeholder="New Username"
                         onChangeText={setNewUsername}
                         value={newUsername}
@@ -104,5 +116,24 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginTop: 10,
+    },
+    switch: {
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',   
+        marginBottom: 20,
+    },
+    darkmodetext: {
+        fontSize: 16,
+        marginBottom: 10,
+
+    },
+    dark: {
+        backgroundColor: '#333',
+        color: '#fff',
+    },
+    light: {
+        backgroundColor: '#fff',
+        color: '#333',
     },
 });
