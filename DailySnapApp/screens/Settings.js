@@ -1,7 +1,7 @@
 import { StyleSheet, View, Text, TextInput, Button, StatusBar, Alert } from 'react-native';
 import React from 'react';
-import { deleteCurrentUser, auth, deleteUserStorageData } from '../Firebase/FirebaseAuth';
-import { firestore, USERS, doc, setDoc } from '../Firebase/FirebaseConfig';
+import { deleteCurrentUser, deleteUserStorageData } from '../Firebase/FirebaseAuth';
+import { firestore, USERS, doc, setDoc, auth } from '../Firebase/FirebaseConfig';
 import { useState } from 'react';
 
 
@@ -58,6 +58,7 @@ export default function Settings({ navigation }) {
                     onPress: async () => {
                         try {
                             const userDocRef = doc(firestore, USERS, auth.currentUser.uid);
+                            console.log(auth.currentUser.uid)
                             await setDoc(userDocRef, { username: newUsername }, { merge: true });
                             setMessage("Username updated successfully");
                             Alert.alert("Username updated successfully");
