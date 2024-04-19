@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, Image, TouchableOpacity, RefreshControl } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, Image, TouchableOpacity, RefreshControl, Button } from 'react-native';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { fetchImages, fetchImageData } from '../Firebase/FirebaseAuth';
 import { auth, firestore } from '../Firebase/FirebaseConfig';
@@ -103,29 +103,20 @@ export default function Home() {
 
     return (
         <View style={[styles.home, isDarkMode ? styles.dark : styles.light]}>
-            <Text style={[styles.heading, isDarkMode ? styles.dark : styles.light]}>Tervetuloa kotisivulle</Text>
             <ScrollView
                 style={styles.scroll}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
             >
-                {images.map((image, index) => (
-                    <View key={index} style={styles.imageContainer}>
-                        <Text style={[styles.username, isDarkMode ? styles.dark : styles.light]}>{image.username}</Text>
-                        <Image source={{ uri: image.url}} style={styles.image} />
-                        <Text style={[styles.caption, isDarkMode ? styles.dark : styles.light]}>{image.caption}</Text>
-                        <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
-                        <Text style={[styles.likes, isDarkMode ? styles.dark : styles.light]}>Likes: {image.likesCount}</Text>
-                    </View>
                 {images.slice().sort((a, b) => b.createdAt - a.createdAt).map((image, index) => (
                     <TouchableOpacity key={index} activeOpacity={1} style={styles.imageContainer} onPress={() => handleDoublePress(image.url, image.likedByCurrentUser)}>
-                        <Text style={styles.username}>{image.username}</Text>
+                        <Text style={[styles.username, isDarkMode ? styles.dark : styles.light]}>{image.username}</Text>
     
                         <View style={styles.uploadTimeContainer}>
                             <Text style={styles.uploadTime}>{formatDate(image.createdAt)}</Text>
                         </View>
     
                         <Image source={{ uri: image.url}} style={styles.image} />
-                        <Text style={styles.caption}>{image.caption}</Text>
+                        <Text style={[styles.caption, isDarkMode ? styles.dark : styles.light]}>{image.caption}</Text>
     
                         <View style={styles.likesContainer}>
                             <Text style={styles.likes}>{image.likesCount} {image.likedByCurrentUser ? '❤️' : '🤍'}</Text>
@@ -145,6 +136,7 @@ const styles = StyleSheet.create({
     heading: {
         fontSize: 24,
         fontWeight: 'bold',
+        textAlign: 'center',
     },
     scroll: {
         flex: 1,
@@ -159,15 +151,16 @@ const styles = StyleSheet.create({
     },
     username: {
         paddingHorizontal: 2,
-        fontWeight: 'bold',
-        fontSize: 20,
-        marginBottom: 2,
+        fontWeight: '800',
+        fontSize: 25,
+        marginBottom: 3,
     },
     caption: {
         paddingHorizontal: 2,
-        fontSize: 15,
+        fontSize: 20,
         marginBottom: 5,
         color: 'gray',
+        fontStyle: 'italic',
     },
     likesContainer: {
         position: 'absolute',
