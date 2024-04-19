@@ -2,6 +2,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, on
 import { storage, collection, addDoc, doc, setDoc, firestore, getDoc, getDocs, USERS, serverTimestamp, auth } from "./FirebaseConfig";
 import { uploadBytesResumable, ref, deleteObject } from "firebase/storage";
 import { listAll, getDownloadURL } from "firebase/storage";
+import { Platform } from "react-native";
 
 
 const signUpWithEmailAndPassword = (auth, email, password) => {
@@ -88,7 +89,7 @@ const uploadToFirebase = async (uri, userId, caption, onProgress) => {
         const fetchResponse = await fetch(uri);
         const theBlob = await fetchResponse.blob();
         const fileName = uri.split('/').pop();
-        
+
 
         // References for storing the image in Firebase Storage
         const userImageRef = ref(storage, `images/${userId}/${fileName}`);
@@ -99,7 +100,7 @@ const uploadToFirebase = async (uri, userId, caption, onProgress) => {
         const uploadTaskAll = uploadBytesResumable(allImagesRef, theBlob);
 
         // Monitor upload progress
-        uploadTask.on('state_changed', 
+        uploadTask.on('state_changed',
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 console.log('Upload is ' + progress + '% done');
@@ -138,6 +139,75 @@ const uploadToFirebase = async (uri, userId, caption, onProgress) => {
     }
 };
 
+const uploadProfilePicture = async (uri, userId, onProgress) => {
+    console.log(`Uploading image from URI: ${uri}`);
+    if (!uri) {
+        console.error('No image URI provided');
+        throw new Error('No image URI provided');
+    }
+    const userImageRefPath = `profilePictures/${userId}`;
+    const userImageRef = ref(storage, userImageRefPath);
+
+    try {
+        const existingPicSnap = await listAll(userImageRef);
+        existingPicSnap.items.forEach(async item => {
+            await deleteObject(item);
+        });
+    } catch (error) {
+        console.error('Error deleting existing profile picture:', error);
+    }
+
+    try {
+        const fileName = uri.split('/').pop();
+        const newUserImageReff = ref(storage, `profilePictures/${userId}/${fileName}`);
+        const response = await fetch(uri);
+        const blob = await response.blob();
+        const uploadTask = uploadBytesResumable(newUserImageReff, blob);
+
+        uploadTask.on('state_changed',
+            (snapshot) => {
+                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                console.log('Upload is ' + progress + '% done');
+                if (onProgress) {
+                    onProgress(progress);
+                }
+            },
+            (error) => {
+                console.error('Error uploading image:', error);
+            },
+            () => {
+                getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                    console.log('File available at', downloadURL);
+                    updateUserProfileImage(userId, downloadURL);
+                });
+            });
+    } catch (error) {
+        console.error('Error uploading profile picture:', error);
+    }
+};
+
+const updateUserProfileImage = async (userId, imageUrl) => {
+    const userRef = doc(firestore, 'users', userId);
+    try {
+        await setDoc(userRef, { profilePicture: imageUrl }, { merge: true });
+        console.log('Profile picture updated successfully');
+    } catch (error) {
+        console.error('Error updating profile picture:', error);
+    }
+}
+
+const fetchProfileImage = async (userId) => {
+    const userRef = doc(firestore, 'users', userId);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists() && userSnap.data().profilePicture) {
+        console.log("proffiilikuva firestoresta linkilä:", userSnap.data().profilePicture);
+        return userSnap.data().profilePicture;
+    } else {
+        console.error('User document not found');
+        return null;
+    }
+};
+
 
 
 const fetchUsername = async (userId) => {
@@ -158,7 +228,7 @@ const fetchImageData = async () => {
     const querySnapshot = await getDocs(imagesRef);
     const imageData = await Promise.all(querySnapshot.docs.map(async docSnapshot => {
         const data = docSnapshot.data();
-        console.log("Image data:", data);  
+        console.log("Image data:", data);
 
         if (!data.userId) {
             console.error("Missing userId for image:", data);
@@ -198,7 +268,7 @@ const getUsername = async () => {
 const deleteCurrentUser = async () => {
     const user = auth.currentUser
 
-    if(!user) {
+    if (!user) {
         throw new Error('No user signed in')
     }
 
@@ -208,13 +278,13 @@ const deleteCurrentUser = async () => {
     } catch (error) {
         console.error('Error deleting user:', error)
         throw error
-    }   
+    }
 }
 
 const deleteUserStorageData = async (userId) => {
     const userFolderRef = ref(storage, `images/${userId}`);
-    const { items }= await listAll(userFolderRef);
-    items.forEach((itemRef)=> {
+    const { items } = await listAll(userFolderRef);
+    items.forEach((itemRef) => {
         deleteObject(itemRef)
     }
     )
@@ -222,10 +292,10 @@ const deleteUserStorageData = async (userId) => {
 
 const deleteImage = async (imageUrl) => {
     try {
-        
+
         const imageRef = ref(storage, imageUrl);
 
-       
+
         await deleteObject(imageRef);
 
         console.log("Image deleted successfully");
@@ -246,5 +316,7 @@ export {
     deleteImage,
     fetchUsername,
     fetchImageData,
-    getUsername
+    getUsername,
+    uploadProfilePicture,
+    fetchProfileImage
 };

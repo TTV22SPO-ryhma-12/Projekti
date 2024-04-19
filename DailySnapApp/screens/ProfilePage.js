@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
 import { getAuth } from 'firebase/auth';
-import { fetchImages, deleteImage, fetchUsername, getUsername } from '../Firebase/FirebaseAuth';
+import { fetchImages, deleteImage, fetchUsername, getUsername, uploadProfilePicture, fetchProfileImage } from '../Firebase/FirebaseAuth';
 import Constants from 'expo-constants';
+import * as ImagePicker from 'expo-image-picker';
 
 const auth = getAuth();
 
@@ -11,6 +12,7 @@ function ProfilePage({ navigation }) {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedImage, setSelectedImage] = useState('');
     const [username, setUsername] = useState('');
+    const [profileImage, setProfileImage] = useState('');
 
     useEffect(() => {
         const fetchImagesFromFirebase = async () => {
@@ -47,6 +49,48 @@ function ProfilePage({ navigation }) {
             console.error("Error signing out:", error.message);
         }
     };
+
+    const pickImage = async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+            alert('Sorry, we need camera roll permissions to make this work!');
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 1,
+        });
+
+        console.log("prrofffiili kuva juttu", result.uri);
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+            const uri = result.assets[0].uri;
+            uploadProfilePicture(uri, auth.currentUser.uid).catch(console.error)
+            .then(() => setProfileImage(uri))
+            .catch(error => console.error('Error uploading profile picture:', error));
+    };
+    };
+
+    
+    useEffect(() => {
+        const fetchProfilePicture = async () => {
+            try {
+                const profileImage = await fetchProfileImage(auth.currentUser.uid);
+                if(profileImage) {
+                    setProfileImage(profileImage);
+                }
+            } catch (error) {
+                console.error("Error fetching profile image:", error.message);
+            }
+        };
+        fetchProfilePicture();
+    }, []);
+
+
+
 
     const showModal = () => {
         Alert.alert(
@@ -109,11 +153,18 @@ function ProfilePage({ navigation }) {
         );
     };
     
+    
 
     return (
         <View style={styles.container}>
             <View style={styles.userInfoContainer}>
                 <Text style={styles.usernameText}>{username}</Text>
+                <View style={styles.profileImageContainer}>
+                  <Image source={{ uri: profileImage || "no image"}} style={styles.profileImage} />
+                    <TouchableOpacity onPress={pickImage}>
+                        <Text style={styles.changeProfileImageText}>Change Profile Image</Text>
+                    </TouchableOpacity>
+                </View>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={handleSettings}>
                         <Text style={styles.buttonText}>Settings</Text>
@@ -225,6 +276,17 @@ const styles = StyleSheet.create({
     deleteButtonText: {
         color: '#fff',
         fontSize: 16,
+    },
+    profileImageContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    profileImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        marginBottom: 20,
+        borderWidth: 3,
     },
 });
 
