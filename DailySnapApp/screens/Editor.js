@@ -3,9 +3,12 @@ import { View, TextInput, Button, Image, StyleSheet, ActivityIndicator } from 'r
 import { uploadToFirebase} from '../Firebase/FirebaseAuth';
 import { useNavigation } from '@react-navigation/native';
 import { auth } from '../Firebase/FirebaseConfig';
+import { useTheme } from '../Components/ThemeContext';
 
 
 export default function Editor({ route }) {
+  const { isDarkMode } = useTheme();
+
   const { imageUri } = route.params;
   const [caption, setCaption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +39,7 @@ export default function Editor({ route }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isDarkMode ? styles.dark : styles.light]}>
       <Image source={{ uri: imageUri }} style={styles.image} />
       <TextInput
         style={styles.input}
@@ -70,7 +73,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     width: '100%',
     padding: 10,
-  }
+  },
+  dark: {
+    backgroundColor: '#333',
+    color: '#fff',
+  },
+  light: {
+    backgroundColor: '#fff',
+    color: '#000',
+  },
 });
 
 export { Editor };

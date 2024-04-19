@@ -3,8 +3,11 @@ import { StyleSheet, View, Text, ScrollView, Image, TouchableOpacity, RefreshCon
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 import { fetchImages, fetchImageData } from '../Firebase/FirebaseAuth';
 import { auth, firestore } from '../Firebase/FirebaseConfig';
+import { useTheme } from '../Components/ThemeContext';
 
 export default function Home() {
+    const { isDarkMode } = useTheme();
+
     const [images, setImages] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
     const [lastClickTime, setLastClickTime] = useState(0);
@@ -99,11 +102,20 @@ export default function Home() {
     };
 
     return (
-        <View style={styles.home}>
+        <View style={[styles.home, isDarkMode ? styles.dark : styles.light]}>
+            <Text style={[styles.heading, isDarkMode ? styles.dark : styles.light]}>Tervetuloa kotisivulle</Text>
             <ScrollView
                 style={styles.scroll}
                 refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
             >
+                {images.map((image, index) => (
+                    <View key={index} style={styles.imageContainer}>
+                        <Text style={[styles.username, isDarkMode ? styles.dark : styles.light]}>{image.username}</Text>
+                        <Image source={{ uri: image.url}} style={styles.image} />
+                        <Text style={[styles.caption, isDarkMode ? styles.dark : styles.light]}>{image.caption}</Text>
+                        <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
+                        <Text style={[styles.likes, isDarkMode ? styles.dark : styles.light]}>Likes: {image.likesCount}</Text>
+                    </View>
                 {images.slice().sort((a, b) => b.createdAt - a.createdAt).map((image, index) => (
                     <TouchableOpacity key={index} activeOpacity={1} style={styles.imageContainer} onPress={() => handleDoublePress(image.url, image.likedByCurrentUser)}>
                         <Text style={styles.username}>{image.username}</Text>
@@ -129,6 +141,10 @@ const styles = StyleSheet.create({
     home: {
         flex: 1,
         paddingTop: 50,
+    },
+    heading: {
+        fontSize: 24,
+        fontWeight: 'bold',
     },
     scroll: {
         flex: 1,
@@ -174,5 +190,16 @@ const styles = StyleSheet.create({
         fontSize: 15,
         marginTop: 5,
         color: 'gray',
+    },
+    dark: {
+        backgroundColor: '#333',
+        color: '#fff',
+    },
+    light: {
+        backgroundColor: '#fff',
+        color: '#333',
+    },
+    likes: {
+        fontSize: 18,
     },
 });

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import Constants from 'expo-constants';
 import { CameraComponent } from './camera';
 
-StatusBar.setBarStyle('light-content', true);
+StatusBar.setBarStyle('dark-content', true);
 
 const NavBar = ({ isSignedIn, onToggleSignIn, onSignOut }) => {
   const navigation = useNavigation();
@@ -56,6 +56,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: '50%',
     transform: [{ translateX: -30 }],
+    marginLeft: 10,
   },
 });
 
