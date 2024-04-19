@@ -13,6 +13,7 @@ export default function Home() {
 
     useEffect(() => {
         fetchImagesFromFirebase();
+        fetchImageDataFromFirebase();
     }, []);
 
     const fetchImagesFromFirebase = async () => {
@@ -32,7 +33,15 @@ export default function Home() {
             console.error("Error fetching images:", error.message);
         }
     };
-
+    
+    const fetchImageDataFromFirebase = async () => {
+        try {
+            const imageData = await fetchImageData();
+            setImages(imageData);
+        } catch (error) {
+            console.error("Error fetching images:", error.message);
+        }
+    };
     const handleRefresh = () => {
         setRefreshing(true);
         fetchImagesFromFirebase().then(() => {
@@ -83,9 +92,6 @@ export default function Home() {
                         <Text style={styles.caption}>{image.caption}</Text>
                         <Button title={image.likedByCurrentUser ? 'Unlike' : 'Like'} onPress={() => handleLike(image.url, image.likedByCurrentUser)} />
                         <Text>Likes: {image.likesCount}</Text>
-                        <TouchableOpacity onPress={() => openImage(image.url)}>
-                            <Text>Open Image</Text>
-                        </TouchableOpacity>
                     </View>
                 ))}
             </ScrollView>
