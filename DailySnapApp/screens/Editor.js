@@ -29,8 +29,8 @@ export default function Editor({ route }) {
               setUploadProgress(progress);
           };
   
-          const { userImageUrl, allImageUrl } = await uploadToFirebase(imageUri, userId, caption, progressHandler);
-          console.log("Image URLs:", userImageUrl, allImageUrl);
+          const { allImageUrl } = await uploadToFirebase(imageUri, userId, caption, progressHandler);
+          console.log("Image URLs:", allImageUrl);
           navigation.goBack();
       } catch (error) {
           console.error("Upload error:", error);
