@@ -3,6 +3,7 @@ import { storage, collection, addDoc, doc, setDoc, firestore, getDoc, getDocs, U
 import { uploadBytesResumable, ref, deleteObject } from "firebase/storage";
 import { listAll, getDownloadURL } from "firebase/storage";
 import { Platform } from "react-native";
+import { deleteDoc } from "firebase/firestore";
 
 
 const signUpWithEmailAndPassword = (auth, email, password) => {
@@ -259,7 +260,9 @@ const getUsername = async () => {
     const docSnap = await getDoc(userDoc);
 
     if (docSnap.exists()) {
+        console.log(docSnap)
         return docSnap.data().username;
+        
     } else {
         throw new Error("User document not found");
     }
@@ -267,20 +270,33 @@ const getUsername = async () => {
 
 
 const deleteCurrentUser = async () => {
-    const user = auth.currentUser
+    const user = auth.currentUser;
 
     if (!user) {
-        throw new Error('No user signed in')
+        throw new Error('No user signed in');
     }
 
+    const userDocRef = doc(firestore, USERS, user.uid);
+
     try {
-        await deleteUser(user)
-        console.log('User deleted successfully')
+        const docSnap = await getDoc(userDocRef);
+        
+        if (!docSnap.exists()) {
+            throw new Error('User document not found');
+        }
+
+        await deleteUser(user);
+        console.log('User deleted successfully from Auth');
+
+        await deleteDoc(userDocRef);
+        console.log('User document deleted successfully from Firestore');
+        
     } catch (error) {
-        console.error('Error deleting user:', error)
-        throw error
+        console.error('Error deleting user:', error);
+        throw error;
     }
-}
+};
+
 
 const deleteUserStorageData = async (userId) => {
     const userFolderRef = ref(storage, `images/${userId}`);

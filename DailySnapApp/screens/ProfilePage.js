@@ -1,25 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dimensions, Modal } from 'react-native';
-import { fetchImages, deleteImage, fetchUsername, getUsername, uploadProfilePicture, fetchProfileImage } from '../Firebase/FirebaseAuth';
-import * as ImagePicker from 'expo-image-picker';
-import Constants from 'expo-constants';
-import { auth } from '../Firebase/FirebaseConfig';
-import { useTheme } from '../Components/ThemeContext';
-
-
+import { fetchImages, deleteImage, getUsername, uploadProfilePicture, fetchProfileImage } from '../Firebase/FirebaseAuth'; // Importing Firebase functions
+import * as ImagePicker from 'expo-image-picker'; // Importing ImagePicker library
+import Constants from 'expo-constants'; // Importing Constants for accessing device constants
+import { auth } from '../Firebase/FirebaseConfig'; // Importing Firebase auth
+import { useTheme } from '../Components/ThemeContext'; // Importing custom hook for theme management
 
 function ProfilePage({ navigation }) {
-    const { isDarkMode, toggleTheme } = useTheme();
+    const { isDarkMode, toggleTheme } = useTheme(); // Using custom hook to manage theme
 
-    const [imageUrls, setImageUrls] = useState([]);
-    const [modalVisible, setModalVisible] = useState(false);
-    const [selectedImage, setSelectedImage] = useState('');
-    const [username, setUsername] = useState('');
-    const [profileImage, setProfileImage] = useState('');
+    // State variables
+    const [imageUrls, setImageUrls] = useState([]); // State to store image URLs
+    const [modalVisible, setModalVisible] = useState(false); // State for modal visibility
+    const [selectedImage, setSelectedImage] = useState(''); // State for selected image URL
+    const [username, setUsername] = useState(''); // State for user's username
+    const [profileImage, setProfileImage] = useState(''); // State for user's profile picture
 
+    // Fetch images from Firebase on component mount
     useEffect(() => {
         const fetchImagesFromFirebase = async () => {
-          try {
+            try {
                 const images = await fetchImages(`images/${auth.currentUser.uid}`);
                 setImageUrls(images);
             } catch (error) {
@@ -29,21 +29,19 @@ function ProfilePage({ navigation }) {
         fetchImagesFromFirebase();
     }, []);
 
-
-
+    // Fetch username from Firebase on component mount
     useEffect(() => {
         const getusername = async () => {
             const user = auth.currentUser.uid;
             if (user) {
                 const username = await getUsername(user);
-                console.log('username', username);
                 setUsername(username);
-        }
+            }
         }
         getusername();
-    } , []);
+    }, []);
 
-
+    // Function to handle sign out
     const handleSignOut = async () => {
         try {
             await auth.signOut();
@@ -53,6 +51,7 @@ function ProfilePage({ navigation }) {
         }
     };
 
+    // Function to pick an image from device's gallery
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
@@ -67,22 +66,20 @@ function ProfilePage({ navigation }) {
             quality: 1,
         });
 
-        console.log("prrofffiili kuva juttu", result.uri);
-
         if (!result.canceled && result.assets && result.assets.length > 0) {
             const uri = result.assets[0].uri;
             uploadProfilePicture(uri, auth.currentUser.uid).catch(console.error)
-            .then(() => setProfileImage(uri))
-            .catch(error => console.error('Error uploading profile picture:', error));
-    };
+                .then(() => setProfileImage(uri))
+                .catch(error => console.error('Error uploading profile picture:', error));
+        };
     };
 
-    
+    // Fetch profile picture from Firebase on component mount
     useEffect(() => {
         const fetchProfilePicture = async () => {
             try {
                 const profileImage = await fetchProfileImage(auth.currentUser.uid);
-                if(profileImage) {
+                if (profileImage) {
                     setProfileImage(profileImage);
                 }
             } catch (error) {
@@ -92,9 +89,7 @@ function ProfilePage({ navigation }) {
         fetchProfilePicture();
     }, []);
 
-
-
-
+    // Function to show sign out confirmation modal
     const showModal = () => {
         Alert.alert(
             "Sign Out",
@@ -114,6 +109,7 @@ function ProfilePage({ navigation }) {
         );
     };
 
+    // Function to show profile picture change confirmation modal
     const showModalpicture = () => {
         Alert.alert(
             "Change Profile Picture",
@@ -133,16 +129,19 @@ function ProfilePage({ navigation }) {
         );
     };
 
+    // Function to navigate to settings screen
     const handleSettings = () => {
         navigation.navigate('Settings');
         console.log("settings screen opened")
     };
 
+    // Function to open an image in modal
     const openImage = (url) => {
         setSelectedImage(url);
         setModalVisible(true);
     };
 
+    // Function to handle image deletion
     const handleDeleteImage = () => {
         Alert.alert(
             "Delete Image",
@@ -158,11 +157,8 @@ function ProfilePage({ navigation }) {
                     onPress: async () => {
                         try {
                             await deleteImage(selectedImage);
-    
                             setImageUrls(prevImages => prevImages.filter(image => image.url !== selectedImage));
-
                             setModalVisible(false);
-    
                             Alert.alert("Image Deleted", "The image has been successfully deleted.");
                         } catch (error) {
                             console.error("Error deleting image:", error.message);
@@ -174,15 +170,14 @@ function ProfilePage({ navigation }) {
             ]
         );
     };
-    
-    
 
+    // JSX rendering
     return (
         <View style={[styles.container, isDarkMode ? styles.dark : styles.light]}>
             <View style={[styles.userInfoContainer, isDarkMode ? styles.dark : styles.light]}>
                 <Text style={[styles.usernameText, isDarkMode ? styles.dark : styles.light]}>{username}</Text>
                 <TouchableOpacity onPress={showModalpicture} style={styles.profileImageContainer}>
-                  <Image source={{ uri: profileImage || "no image" }} style={styles.profileImage} />
+                    <Image source={{ uri: profileImage || "no image" }} style={styles.profileImage} />
                 </TouchableOpacity>
                 <View style={styles.buttonContainer}>
                     <TouchableOpacity style={styles.button} onPress={handleSettings}>
@@ -222,7 +217,9 @@ function ProfilePage({ navigation }) {
     );
 }
 
+//Styles
 const styles = StyleSheet.create({
+    //Style definitions
     container: {
         flex: 1,
         backgroundColor: '#fff',
