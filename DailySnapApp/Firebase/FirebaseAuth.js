@@ -55,6 +55,32 @@ const fetchImages = async (path) => {
     }
 };
 
+const fetchImagesForCurrentUser = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+        throw new Error('No user signed in');
+    }
+
+    try {
+        const username = await getUsername(user.uid);
+        const imagesRef = collection(firestore, 'images');
+        const querySnapshot = await getDocs(imagesRef.where('username', '==', username));
+        const imageData = querySnapshot.docs.map(docSnapshot => {
+            const data = docSnapshot.data();
+            return {
+                url: data.imageUrl,
+                caption: data.caption,
+                createdAt: data.createdAt.toDate(),
+            };
+        });
+        return imageData;
+    } catch (error) {
+        console.error("Error fetching images for current user:", error.message);
+        throw error;
+    }
+};
+
+
 
 
 const signIn = (email, password) => {
@@ -93,15 +119,13 @@ const uploadToFirebase = async (uri, userId, caption, onProgress) => {
 
 
         // References for storing the image in Firebase Storage
-        const userImageRef = ref(storage, `images/${userId}/${fileName}`);
         const allImagesRef = ref(storage, `allimages/${fileName}`);
 
         // Upload function handling both user-specific and general storage
-        const uploadTask = uploadBytesResumable(userImageRef, theBlob);
         const uploadTaskAll = uploadBytesResumable(allImagesRef, theBlob);
 
         // Monitor upload progress
-        uploadTask.on('state_changed',
+        uploadTaskAll.on('state_changed',
             (snapshot) => {
                 const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
                 console.log('Upload is ' + progress + '% done');
@@ -114,7 +138,6 @@ const uploadToFirebase = async (uri, userId, caption, onProgress) => {
 
 
         // Perform uploads to both directories
-        await uploadTask;
         await uploadTaskAll;
 
         const downloadUrl = await getDownloadURL(allImagesRef);
@@ -133,7 +156,7 @@ const uploadToFirebase = async (uri, userId, caption, onProgress) => {
         });
 
         console.log('Image uploaded and metadata stored successfully');
-        return { userImageUrl: downloadUrl };
+        return { allImageUrl: downloadUrl };
     } catch (error) {
         console.error('Error uploading image and storing metadata:', error);
         throw error;
@@ -307,20 +330,35 @@ const deleteUserStorageData = async (userId) => {
     )
 }
 
-const deleteImage = async (imageUrl) => {
+const deleteimageData = async (imageUrl) => {
+    // Firestore uses the encoded URL as the document ID
+    const encodedDocId = encodeURIComponent(imageUrl);
+    const imageRef = doc(firestore, 'images', encodedDocId);
+    console.log(imageRef)
+
     try {
+        await deleteDoc(imageRef);
+        console.log("Firestore image data deleted successfully");
+    } catch (error) {
+        console.error("Error deleting Firestore image data:", error);
+        throw error;
+    }
+};
 
+const deleteImage = async (imageUrl, documentId) => {
+    try {
+        // 1. Delete the image from Firebase Storage
         const imageRef = ref(storage, imageUrl);
-
-
+        
         await deleteObject(imageRef);
-
-        console.log("Image deleted successfully");
+        console.log("Image deleted from Firebase Storage successfully");
+        await deleteimageData(imageUrl)
+        
     } catch (error) {
         console.error("Error deleting image:", error.message);
         throw error;
     }
-}
+};
 
 export {
     signUpWithEmailAndPassword,
@@ -328,6 +366,7 @@ export {
     onAuthStateChange,
     uploadToFirebase,
     fetchImages,
+    fetchImagesForCurrentUser,
     deleteCurrentUser,
     deleteUserStorageData,
     deleteImage,

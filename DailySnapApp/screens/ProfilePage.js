@@ -3,8 +3,9 @@ import { TouchableOpacity, View, Text, Alert, StyleSheet, Image, ScrollView, Dim
 import { fetchImages, deleteImage, getUsername, uploadProfilePicture, fetchProfileImage } from '../Firebase/FirebaseAuth'; // Importing Firebase functions
 import * as ImagePicker from 'expo-image-picker'; // Importing ImagePicker library
 import Constants from 'expo-constants'; // Importing Constants for accessing device constants
-import { auth } from '../Firebase/FirebaseConfig'; // Importing Firebase auth
+import { auth, firestore } from '../Firebase/FirebaseConfig'; // Importing Firebase auth
 import { useTheme } from '../Components/ThemeContext'; // Importing custom hook for theme management
+import { collection, query, getDocs, where } from 'firebase/firestore'
 
 function ProfilePage({ navigation }) {
     const { isDarkMode, toggleTheme } = useTheme(); // Using custom hook to manage theme
@@ -16,17 +17,53 @@ function ProfilePage({ navigation }) {
     const [username, setUsername] = useState(''); // State for user's username
     const [profileImage, setProfileImage] = useState(''); // State for user's profile picture
 
-    // Fetch images from Firebase on component mount
     useEffect(() => {
-        const fetchImagesFromFirebase = async () => {
-            try {
-                const images = await fetchImages(`images/${auth.currentUser.uid}`);
-                setImageUrls(images);
-            } catch (error) {
-                console.error("Error fetching images:", error.message);
+        fetchImageDataFromFirebase();
+    }, []);
+
+    const fetchImageDataFromFirebase = async () => {
+        try {
+            const user = auth.currentUser;
+            if (!user) {
+                console.error("No user signed in");
+                return;
             }
-        };
-        fetchImagesFromFirebase();
+            
+            const userId = user.uid;
+            
+            // Construct a Firestore query to fetch images with matching userId
+            const imagesRef = collection(firestore, 'images');
+            const q = query(imagesRef, where('userId', '==', userId));
+            
+            // Execute the query
+            const querySnapshot = await getDocs(q);
+            
+            // Extract image URLs from the query snapshot
+            const imageUrls = [];
+            querySnapshot.forEach((doc) => {
+                const imageData = doc.data();
+                // Assuming each image document has a 'imageUrl' field
+                const imageUrl = imageData.imageUrl;
+                imageUrls.push({ url: imageUrl });
+            });
+            
+            // Set the state with image URLs
+            setImageUrls(imageUrls);
+        } catch (error) {
+            console.error("Error fetching images:", error.message);
+        }
+    };
+    
+    // Fetch username from Firebase on component mount
+    useEffect(() => {
+        const getusername = async () => {
+            const user = auth.currentUser.uid;
+            if (user) {
+                const username = await getUsername(user);
+                setUsername(username);
+            }
+        }
+        getusername();
     }, []);
 
     // Fetch username from Firebase on component mount
@@ -142,7 +179,7 @@ function ProfilePage({ navigation }) {
     };
 
     // Function to handle image deletion
-    const handleDeleteImage = () => {
+    const handleDeleteImage = async () => {
         Alert.alert(
             "Delete Image",
             "Are you sure you want to delete this image?",
@@ -156,7 +193,13 @@ function ProfilePage({ navigation }) {
                     text: "Delete",
                     onPress: async () => {
                         try {
-                            await deleteImage(selectedImage);
+                            // Extract the document ID from the selected image URL
+                            const documentId = decodeURIComponent(selectedImage);
+                            
+                            // Call deleteImage with the image URL and document ID
+                            await deleteImage(selectedImage, documentId);
+    
+                            // Update state to remove the deleted image
                             setImageUrls(prevImages => prevImages.filter(image => image.url !== selectedImage));
                             setModalVisible(false);
                             Alert.alert("Image Deleted", "The image has been successfully deleted.");
@@ -170,6 +213,7 @@ function ProfilePage({ navigation }) {
             ]
         );
     };
+    
 
     // JSX rendering
     return (
