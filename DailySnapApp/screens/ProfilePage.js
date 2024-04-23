@@ -215,7 +215,7 @@ function ProfilePage({ navigation }) {
     };
     
 
-    // JSX rendering
+    
     return (
         <View style={[styles.container, isDarkMode ? styles.dark : styles.light]}>
             <View style={[styles.userInfoContainer, isDarkMode ? styles.dark : styles.light]}>
