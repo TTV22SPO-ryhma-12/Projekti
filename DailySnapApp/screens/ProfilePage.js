@@ -338,16 +338,15 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     profileImageContainer: {
-        alignItems: 'center',
+        alignItems: 'left',
         marginBottom: 20,
     },
     profileImage: {
-        width: 200,
-        height: 200,
+        width: 150,
+        height: 150,
         borderRadius: 100,
-        marginBottom: 20,
-        borderWidth: 3,
-        alignContent: 'right',
+        marginBottom: 1,
+        borderWidth: 2,
     },
     changeProfileImageText: {
         color: 'white',
