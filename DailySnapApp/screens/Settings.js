@@ -76,7 +76,7 @@ export default function Settings({ navigation }) {
             {showForm ? (
                 <View style={[styles.newUsername, isDarkMode ? styles.dark : styles.light]}>
                     <TextInput
-                        style={[styles.input, isDarkMode ? styles.dark : styles.light]}
+                        style={styles.input}
                         placeholder="New Username"
                         onChangeText={setNewUsername}
                         value={newUsername}
@@ -99,7 +99,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'white',
     },
     title: {
         fontSize: 20,
@@ -111,6 +110,7 @@ const styles = StyleSheet.create({
         marginVertical: 10,
         borderWidth: 1,
         padding: 10,
+        color: '#333',
     },
     buttonGroup: {
         flexDirection: 'row',
@@ -135,5 +135,10 @@ const styles = StyleSheet.create({
     light: {
         backgroundColor: '#fff',
         color: '#333',
-    },
+        textColor: '#333',
+    }, 
+    newUsername: {
+        alignItems: 'center',
+        color: '#fff',
+    }
 });
