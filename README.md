@@ -1,2 +1,3 @@
 # Projekti
-aito ja oikee
+
+Luodaan sosiaalisenmedian sovellus käyttämällä Expo Go:ta. Sovellus käyttää puhelimen kameraa ja Firebase-tietokantaa.  Käyttäjä voi luoda oman käyttäjätunnuksen ja profiilin. Käyttäjä voi lisätä kuvia ja katsoa muiden käyttäjien lisäämiä kuvia. Käyttäjä voi myös tykätä muista kuvista. Sovelluksessa on kuusi näkymää, jotka ovat kirjautumissivu, rekisteröintisivu, etusivu, kuvanmuokkaus, profiilisivu, asetussivu. Kirjautumissivulla käyttäjä voi rekisteröityä sovellukseen ja luoda profiilin. Etusivulla näkyy muiden käyttäjien kuvia. Profiilisivulla näkyy käyttäjän lisäämät kuvat ja käyttäjä voi poistaa kuviaan. Asetussivulla käyttäjä voi poistaa käyttäjän, vaihtaa käyttäjänimen tai asettaa tummannäkymän päälle.
