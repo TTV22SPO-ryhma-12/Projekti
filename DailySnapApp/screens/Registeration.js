@@ -26,7 +26,7 @@ function RegistrationForm() {
                 email: email,
             });
             setSuccessMessage('User has been registered');
-            console.log('rekisteröinti onnistui')
+            console.log('Registratrion successfull')
 
         } catch (error) {
             setError(error.message);

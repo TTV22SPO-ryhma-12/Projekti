@@ -5,16 +5,22 @@ import { useNavigation } from '@react-navigation/native';
 import { auth } from '../Firebase/FirebaseConfig';
 import { useTheme } from '../Components/ThemeContext';
 
-
 export default function Editor({ route }) {
+  // Accessing the dark mode state from the ThemeContext
   const { isDarkMode } = useTheme();
 
+  // Extracting imageUri from the route params
   const { imageUri } = route.params;
+
+  // State variables for caption input, loading state, and upload progress
   const [caption, setCaption] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const navigation = useNavigation();
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Accessing navigation object for navigation actions
+  const navigation = useNavigation();
+
+  // Function to upload image to Firebase
   const uploadImage = async () => {
     console.log("Upload started...");
     setIsLoading(true);
@@ -24,21 +30,24 @@ export default function Editor({ route }) {
       setIsLoading(false);
       return;
     }
-      try {
-          const progressHandler = (progress) => {
-              setUploadProgress(progress);
-          };
-  
-          const { allImageUrl } = await uploadToFirebase(imageUri, userId, caption, progressHandler);
-          console.log("Image URLs:", allImageUrl);
-          navigation.goBack();
-      } catch (error) {
-          console.error("Upload error:", error);
-      }
-      setIsLoading(false);
+    try {
+      // Function to track upload progress
+      const progressHandler = (progress) => {
+        setUploadProgress(progress);
+      };
+
+      // Uploading image to Firebase and getting back image URLs
+      const { allImageUrl } = await uploadToFirebase(imageUri, userId, caption, progressHandler);
+      console.log("Image URLs:", allImageUrl);
+      navigation.goBack(); // Navigate back after successful upload
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
+    setIsLoading(false);
   };
 
   return (
+    // Main view with conditional styling based on dark mode
     <View style={[styles.container, isDarkMode ? styles.dark : styles.light]}>
       <Image source={{ uri: imageUri }} style={styles.image} />
       <TextInput
@@ -56,6 +65,7 @@ export default function Editor({ route }) {
   );
 }
 
+// Stylesheet for the Editor component
 const styles = StyleSheet.create({
   container: {
     flex: 1,

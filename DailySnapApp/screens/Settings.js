@@ -5,13 +5,17 @@ import { firestore, USERS, doc, setDoc, auth } from '../Firebase/FirebaseConfig'
 import { useTheme } from '../Components/ThemeContext';
 
 export default function Settings({ navigation }) {
+    // Accessing the dark mode state and toggle function from the ThemeContext
     const { isDarkMode, toggleTheme } = useTheme();
 
+    // State variables for controlling form visibility, new username input, and messages
     const [showForm, setShowForm] = useState(false);
     const [newUsername, setNewUsername] = useState('');
     const [message, setMessage] = useState('');
 
+    // Function to handle account deletion
     const handleDeleteAccount = async () => {
+        // Confirmation alert before deleting the account
         Alert.alert(
             "Delete Account",
             "Are you sure you want to delete your account?",
@@ -24,6 +28,7 @@ export default function Settings({ navigation }) {
                 {
                     text: "Delete Account",
                     onPress: async () => {
+                        // Deleting user data from storage and Firebase
                         try {
                             const userId = auth.currentUser.uid;
                             await deleteUserStorageData(userId);
@@ -39,29 +44,34 @@ export default function Settings({ navigation }) {
         );
     };
 
+    // Function to handle updating username
     const handleUpdateUsername = async () => {
+        // Validation for empty username
         if (!newUsername.trim()) {
             Alert.alert("Username cannot be empty");
             return;
         }
         try {
+            // Updating username in Firestore
             const userDocRef = doc(firestore, USERS, auth.currentUser.uid);
             await setDoc(userDocRef, { username: newUsername }, { merge: true });
             setMessage("Username updated successfully");
             Alert.alert("Username updated successfully");
-            navigation.goBack();
+            navigation.goBack(); // Navigate back after successful update
         } catch (error) {
             console.error("Error updating username:", error.message);
             Alert.alert("Error updating username:", error.message);
         }
     }
 
+    // Function to handle canceling username update
     const handleCancelUpdate = () => {
         setShowForm(false);
         setNewUsername('');
     }
 
     return (
+        // Main view with conditional rendering based on dark mode
         <View style={[styles.container, isDarkMode ? styles.dark : styles.light]}>
             <Text style={[styles.title, isDarkMode ? styles.dark : styles.light]}>Settings</Text>
             <View style={styles.switch}>
@@ -93,7 +103,7 @@ export default function Settings({ navigation }) {
         </View>
     );
 }
-
+// Stylesheet for the Settings component
 const styles = StyleSheet.create({
     container: {
         flex: 1,
